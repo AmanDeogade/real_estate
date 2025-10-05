@@ -1,0 +1,309 @@
+<% layout("/layouts/boilerplate") %>
+
+<style>
+    .analytics-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        color: white;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        text-align: center;
+        transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #667eea;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        color: #7f8c8d;
+        font-size: 1rem;
+    }
+
+    .analytics-section {
+        background: white;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        color: #2c3e50;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #667eea;
+    }
+
+    .inquiry-item {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        border-left: 4px solid #667eea;
+    }
+
+    .inquiry-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .inquiry-user {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .inquiry-date {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+    }
+
+    .inquiry-message {
+        color: #555;
+        margin-bottom: 0.5rem;
+    }
+
+    .inquiry-status {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .status-new { background: #e3f2fd; color: #1976d2; }
+    .status-contacted { background: #fff3e0; color: #f57c00; }
+    .status-visited { background: #e8f5e8; color: #388e3c; }
+    .status-closed { background: #ffebee; color: #d32f2f; }
+
+    .back-link {
+        display: inline-block;
+        margin-bottom: 2rem;
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .back-link:hover {
+        color: #5a6fd8;
+    }
+
+    .property-info {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+    }
+
+    .property-title {
+        color: #2c3e50;
+        margin-bottom: 1rem;
+    }
+
+    .property-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .detail-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .detail-icon {
+        color: #667eea;
+        width: 20px;
+    }
+</style>
+
+<!-- Analytics Header -->
+<div class="analytics-header">
+    <div class="container">
+        <h2 class="text-center mb-4">Property Analytics</h2>
+        <p class="text-center">Track your property's performance and engagement</p>
+    </div>
+</div>
+
+<div class="container">
+    <a href="/listings/<%= listing._id %>" class="back-link">
+        <i class="fas fa-arrow-left"></i> Back to Property
+    </a>
+
+    <!-- Property Information -->
+    <div class="property-info">
+        <h4 class="property-title"><%= listing.title %></h4>
+        <div class="property-details">
+            <div class="detail-item">
+                <i class="fas fa-map-marker-alt detail-icon"></i>
+                <span><%= listing.address?.city %>, <%= listing.address?.state %></span>
+            </div>
+            <div class="detail-item">
+                <i class="fas fa-tag detail-icon"></i>
+                <span><%= listing.listingType.charAt(0).toUpperCase() + listing.listingType.slice(1) %></span>
+            </div>
+            <div class="detail-item">
+                <i class="fas fa-home detail-icon"></i>
+                <span><%= listing.propertyType.charAt(0).toUpperCase() + listing.propertyType.slice(1) %></span>
+            </div>
+            <div class="detail-item">
+                <i class="fas fa-calendar detail-icon"></i>
+                <span>Listed <%= new Date(listing.createdAt).toLocaleDateString() %></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number"><%= totalViews %></div>
+            <div class="stat-label">Total Views</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number"><%= totalInquiries %></div>
+            <div class="stat-label">Total Inquiries</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number"><%= listing.status.charAt(0).toUpperCase() + listing.status.slice(1).replace('_', ' ') %></div>
+            <div class="stat-label">Current Status</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number"><%= listing.featured ? 'Yes' : 'No' %></div>
+            <div class="stat-label">Featured</div>
+        </div>
+    </div>
+
+    <!-- Recent Inquiries -->
+    <div class="analytics-section">
+        <h4 class="section-title">Recent Inquiries</h4>
+        <% if (recentInquiries && recentInquiries.length > 0) { %>
+            <% for(let inquiry of recentInquiries) { %>
+                <div class="inquiry-item">
+                    <div class="inquiry-header">
+                        <div class="inquiry-user">
+                            <%= inquiry.user.firstName %> <%= inquiry.user.lastName %>
+                        </div>
+                        <div class="inquiry-date">
+                            <%= new Date(inquiry.createdAt).toLocaleDateString() %>
+                        </div>
+                    </div>
+                    <div class="inquiry-message">
+                        <strong>Message:</strong> <%= inquiry.message %>
+                    </div>
+                    <div class="inquiry-message">
+                        <strong>Contact Preference:</strong> <%= inquiry.contactPreference.charAt(0).toUpperCase() + inquiry.contactPreference.slice(1) %>
+                    </div>
+                    <div class="inquiry-message">
+                        <strong>Contact:</strong> 
+                        <a href="mailto:<%= inquiry.user.email %>"><%= inquiry.user.email %></a>
+                        <% if (inquiry.user.phone) { %>
+                            | <a href="tel:<%= inquiry.user.phone %>"><%= inquiry.user.phone %></a>
+                        <% } %>
+                    </div>
+                    <div class="mt-2">
+                        <span class="inquiry-status status-<%= inquiry.status %>">
+                            <%= inquiry.status.charAt(0).toUpperCase() + inquiry.status.slice(1) %>
+                        </span>
+                    </div>
+                </div>
+            <% } %>
+        <% } else { %>
+            <p class="text-muted">No inquiries yet. Promote your property to get more leads!</p>
+        <% } %>
+    </div>
+
+    <!-- Performance Insights -->
+    <div class="analytics-section">
+        <h4 class="section-title">Performance Insights</h4>
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Engagement Rate</h6>
+                <% if (totalViews > 0) { %>
+                    <% const engagementRate = ((totalInquiries / totalViews) * 100).toFixed(1) %>
+                    <div class="progress mb-3">
+                        <div class="progress-bar" role="progressbar" style="width: <%= Math.min(engagementRate, 100) %>%" 
+                             aria-valuenow="<%= engagementRate %>" aria-valuemin="0" aria-valuemax="100">
+                            <%= engagementRate %>%
+                        </div>
+                    </div>
+                    <small class="text-muted">
+                        <%= totalInquiries %> inquiries from <%= totalViews %> views
+                    </small>
+                <% } else { %>
+                    <p class="text-muted">No views yet</p>
+                <% } %>
+            </div>
+            <div class="col-md-6">
+                <h6>Response Time</h6>
+                <% if (recentInquiries && recentInquiries.length > 0) { %>
+                    <% const latestInquiry = recentInquiries[0] %>
+                    <% const responseTime = Math.floor((Date.now() - new Date(latestInquiry.createdAt)) / (1000 * 60 * 60 * 24)) %>
+                    <p class="<%= responseTime <= 1 ? 'text-success' : responseTime <= 3 ? 'text-warning' : 'text-danger' %>">
+                        <strong><%= responseTime %></strong> days since last inquiry
+                    </p>
+                    <% if (responseTime > 3) { %>
+                        <small class="text-danger">Consider following up with recent inquiries</small>
+                    <% } %>
+                <% } else { %>
+                    <p class="text-muted">No inquiries to respond to</p>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="analytics-section">
+        <h4 class="section-title">Quick Actions</h4>
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <a href="/listings/<%= listing._id %>/edit" class="btn btn-primary w-100">
+                    <i class="fas fa-edit"></i> Edit Property
+                </a>
+            </div>
+            <div class="col-md-4 mb-3">
+                <a href="/listings/<%= listing._id %>" class="btn btn-info w-100">
+                    <i class="fas fa-eye"></i> View Property
+                </a>
+            </div>
+            <div class="col-md-4 mb-3">
+                <button class="btn btn-success w-100" onclick="toggleFeatured()">
+                    <i class="fas fa-star"></i> 
+                    <%= listing.featured ? 'Remove Featured' : 'Make Featured' %>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleFeatured() {
+        if (confirm('Are you sure you want to change the featured status of this property?')) {
+            // You can implement AJAX call here to toggle featured status
+            alert('Featured status updated! Refresh the page to see changes.');
+        }
+    }
+</script>
+

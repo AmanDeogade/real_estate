@@ -1,0 +1,126 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container mt-4">
+    <h1>Broker Management Dashboard</h1>
+    
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-primary"><%= stats?.totalBuyers || 0 %></h3>
+                    <p class="card-text">Total Buyers</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-success"><%= stats?.assignedBuyers || 0 %></h3>
+                    <p class="card-text">Broker Assigned</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-warning"><%= stats?.pendingAssignments || 0 %></h3>
+                    <p class="card-text">Pending</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-info"><%= stats?.totalFavorites || 0 %></h3>
+                    <p class="card-text">Total Favorites</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h4>Buyer Management</h4>
+        </div>
+        <div class="card-body">
+            <% if (buyers && buyers.length > 0) { %>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Buyer Name</th>
+                                <th>Contact</th>
+                                <th>Preferences</th>
+                                <th>Favorites</th>
+                                <th>Broker Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% buyers.forEach(buyer => { %>
+                            <tr>
+                                <td>
+                                    <strong><%= buyer.firstName %> <%= buyer.lastName %></strong>
+                                </td>
+                                <td>
+                                    <div><%= buyer.email %></div>
+                                    <small class="text-muted"><%= buyer.phone || 'No phone' %></small>
+                                </td>
+                                <td>
+                                    <div><strong>Budget:</strong> ₹<%= buyer.propertyPreferences?.budgetRange?.min || 0 %> - ₹<%= buyer.propertyPreferences?.budgetRange?.max || 0 %></div>
+                                    <div><strong>Types:</strong> <%= buyer.propertyPreferences?.preferredTypes?.join(', ') || 'Any' %></div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary"><%= buyer.favorites?.length || 0 %> favorites</span>
+                                </td>
+                                <td>
+                                    <% if (buyer.assignedBroker) { %>
+                                        <span class="badge bg-success">Assigned to <%= buyer.assignedBroker.firstName %></span>
+                                    <% } else { %>
+                                        <span class="badge bg-warning">No broker</span>
+                                    <% } %>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-sm btn-primary" onclick="viewBuyerDetails('<%= buyer._id %>')">
+                                            View Details
+                                        </button>
+                                        <button class="btn btn-sm btn-success" onclick="assignBroker('<%= buyer._id %>')">
+                                            Assign Broker
+                                        </button>
+                                        <button class="btn btn-sm btn-info" onclick="sendMessage('<%= buyer._id %>')">
+                                            Message
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            <% } else { %>
+                <div class="text-center py-4">
+                    <h5 class="text-muted">No buyers found</h5>
+                    <p>Buyers will appear here when they favorite your properties.</p>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<script>
+function viewBuyerDetails(buyerId) {
+    // Implement buyer details modal
+    alert('View buyer details: ' + buyerId);
+}
+
+function assignBroker(buyerId) {
+    // Implement broker assignment
+    alert('Assign broker to: ' + buyerId);
+}
+
+function sendMessage(buyerId) {
+    // Implement messaging
+    window.location.href = `/communication/new?buyerId=${buyerId}`;
+}
+</script>

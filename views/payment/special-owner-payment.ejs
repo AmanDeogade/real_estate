@@ -1,0 +1,359 @@
+<% layout("/layouts/boilerplate") %>
+
+<style>
+    .payment-container {
+        max-width: 600px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .benefits-list {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin: 1.5rem 0;
+    }
+
+    .benefits-list h5 {
+        color: #28a745;
+        margin-bottom: 1rem;
+    }
+
+    .benefits-list ul {
+        list-style: none;
+        padding: 0;
+    }
+
+    .benefits-list li {
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .benefits-list li:last-child {
+        border-bottom: none;
+    }
+
+    .benefits-list li:before {
+        content: "✓";
+        color: #28a745;
+        font-weight: bold;
+        margin-right: 0.5rem;
+    }
+
+    .payment-button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: transform 0.2s;
+        width: 100%;
+        margin-top: 1rem;
+    }
+
+    .payment-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .price-display {
+        text-align: center;
+        font-size: 2rem;
+        color: #28a745;
+        font-weight: bold;
+        margin: 1rem 0;
+    }
+
+    .razorpay-button {
+        display: none;
+    }
+</style>
+
+<div class="container">
+    <div class="payment-container">
+        <% if (!user) { %>
+            <div class="alert alert-danger text-center">
+                <i class="fas fa-exclamation-triangle"></i>
+                User information not available. Please try refreshing the page or contact support.
+            </div>
+        <% } else { %>
+        <% if (locals.error) { %>
+            <div class="alert alert-warning text-center mb-4">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <%= error %>
+            </div>
+        <% } %>
+        
+        <div class="text-center mb-4">
+            <h2><i class="fas fa-crown text-warning"></i> Become a Special Owner</h2>
+            <p class="text-muted">Unlock premium features and get priority listing</p>
+        </div>
+
+        <div class="price-display">
+            ₹10
+        </div>
+
+        <div class="benefits-list">
+            <h5><i class="fas fa-star text-warning"></i> Special Owner Benefits</h5>
+            <ul>
+                <li>Priority listing in search results</li>
+                <li>Featured property placement</li>
+                <li>Enhanced property visibility</li>
+                <li>Premium customer support</li>
+                <li>Advanced analytics dashboard</li>
+                <li>Exclusive marketing tools</li>
+            </ul>
+        </div>
+
+        <button id="upgradeBtn" class="payment-button" <%= locals.error ? 'disabled' : '' %>>
+            <i class="fas fa-crown me-2"></i>
+            <%= locals.error ? 'Payment Service Unavailable' : 'Pay ₹10 & Upgrade Now' %>
+        </button>
+        
+        <!-- Test button for debugging -->
+        <button id="testBtn" class="btn btn-outline-info mt-2" style="width: 100%;" <%= locals.error ? 'disabled' : '' %>>
+            <i class="fas fa-bug me-2"></i>
+            Test Verification Endpoint
+        </button>
+        
+        <!-- Test mode bypass button -->
+        <button id="testModeBtn" class="btn btn-outline-warning mt-2" style="width: 100%;" <%= locals.error ? 'disabled' : '' %>>
+            <i class="fas fa-flask me-2"></i>
+            Test Mode: Simulate Payment Success
+        </button>
+
+        <div class="text-center mt-3">
+            <small class="text-muted">
+                Secure payment powered by Razorpay
+            </small>
+            <div class="alert alert-info mt-3" role="alert">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Test Mode Active:</strong> Use test cards for payment testing. 
+                If you encounter issues, try the "Test Mode: Simulate Payment Success" button below.
+            </div>
+        </div>
+        <% } %>
+    </div>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    <% if (user) { %>
+    document.getElementById('upgradeBtn').addEventListener('click', async function() {
+        try {
+            // Show loading state
+            this.disabled = true;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creating Order...';
+
+            // Create payment order
+            const response = await fetch('/payment/create-order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            const data = await response.json();
+            
+            if (data.success) {
+                // Initialize Razorpay checkout
+                const options = {
+                    key: '<%= process.env.RAZORPAY_KEY_ID %>',
+                    amount: data.order.amount,
+                    currency: data.order.currency,
+                    name: 'WanderLust',
+                    description: 'Special Owner Upgrade',
+                    order_id: data.order.id,
+                    handler: async function(razorpayResponse) {
+                        console.log('🎉 Razorpay payment successful!');
+                        console.log('📋 Full response:', razorpayResponse);
+                        console.log('🔑 Order ID:', razorpayResponse.razorpay_order_id);
+                        console.log('💳 Payment ID:', razorpayResponse.razorpay_response_id || razorpayResponse.razorpay_payment_id);
+                        console.log('🔐 Signature:', razorpayResponse.razorpay_signature);
+                        
+                        // Handle test mode - check for different field names
+                        const orderId = razorpayResponse.razorpay_order_id || razorpayResponse.order_id;
+                        const paymentId = razorpayResponse.razorpay_payment_id || razorpayResponse.razorpay_response_id || razorpayResponse.payment_id;
+                        const signature = razorpayResponse.razorpay_signature || razorpayResponse.signature;
+                        
+                        console.log('🔍 Extracted data:', { orderId, paymentId, signature });
+                        
+                        // Check if we have the required data
+                        if (!orderId || !paymentId || !signature) {
+                            console.error('❌ Missing payment data from Razorpay');
+                            console.log('📝 Available fields:', Object.keys(razorpayResponse));
+                            alert('Payment data incomplete. Please contact support.');
+                            return;
+                        }
+                        
+                        // Prepare verification data
+                        const verificationData = {
+                            razorpay_order_id: orderId,
+                            razorpay_payment_id: paymentId,
+                            razorpay_signature: signature
+                        };
+                        
+                        console.log('📤 Sending verification data:', verificationData);
+                        
+                        // Verify payment on server
+                        const verifyResponse = await fetch('/payment/verify-payment', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(verificationData)
+                        });
+
+                        const verifyData = await verifyResponse.json();
+                        console.log('📥 Verification response:', verifyData);
+                        
+                        if (verifyData.success) {
+                            console.log('✅ Payment verified successfully!');
+                            // Redirect to success page
+                            window.location.href = '/payment/success';
+                        } else {
+                            console.error('❌ Payment verification failed:', verifyData.message);
+                            alert('Payment verification failed: ' + verifyData.message);
+                            // Redirect to failure page
+                            window.location.href = '/payment/failure';
+                        }
+                    },
+                    prefill: {
+                        name: '<%= user && user.firstName && user.lastName ? user.firstName + " " + user.lastName : (user && user.username ? user.username : "") %>',
+                        email: '<%= user && user.email ? user.email : "" %>',
+                        contact: '<%= user && user.phone ? user.phone : "" %>'
+                    },
+                    theme: {
+                        color: '#667eea'
+                    }
+                };
+
+                const rzp = new Razorpay(options);
+                
+                // Add error handling
+                rzp.on('payment.failed', function (response) {
+                    console.error('❌ Payment failed:', response.error);
+                    alert('Payment failed: ' + response.error.description);
+                    // Reset button state
+                    document.getElementById('upgradeBtn').disabled = false;
+                    document.getElementById('upgradeBtn').innerHTML = '<i class="fas fa-crown me-2"></i>Pay ₹10 & Upgrade Now';
+                });
+                
+                rzp.open();
+            } else {
+                alert('Failed to create payment order: ' + data.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+        } finally {
+            // Reset button state
+            this.disabled = false;
+            this.innerHTML = '<i class="fas fa-crown me-2"></i>Pay ₹10 & Upgrade Now';
+        }
+    });
+    
+    // Test verification endpoint
+    document.getElementById('testBtn').addEventListener('click', async function() {
+        try {
+            console.log('🧪 Testing verification endpoint...');
+            
+            const testData = {
+                razorpay_order_id: 'test_order_' + Date.now(),
+                razorpay_payment_id: 'test_payment_' + Date.now(),
+                razorpay_signature: 'test_signature_' + Date.now()
+            };
+            
+            console.log('📤 Sending test data:', testData);
+            
+            const response = await fetch('/payment/test-verification', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(testData)
+            });
+            
+            const result = await response.json();
+            console.log('📥 Test response:', result);
+            alert('Test completed! Check console for details.');
+            
+        } catch (error) {
+            console.error('💥 Test error:', error);
+            alert('Test failed: ' + error.message);
+        }
+    });
+    
+    // Test mode bypass - simulate successful payment
+    document.getElementById('testModeBtn').addEventListener('click', async function() {
+        try {
+            console.log('🧪 Test mode: Simulating payment success...');
+            
+            // Simulate Razorpay response data
+            const simulatedResponse = {
+                razorpay_order_id: 'test_order_' + Date.now(),
+                razorpay_payment_id: 'test_payment_' + Date.now(),
+                razorpay_signature: 'test_signature_' + Date.now()
+            };
+            
+            console.log('🎭 Simulated payment response:', simulatedResponse);
+            
+            // Call the handler function directly
+            const handler = async function(razorpayResponse) {
+                console.log('🎉 Simulated Razorpay payment successful!');
+                console.log('📋 Full response:', razorpayResponse);
+                
+                // Handle test mode - check for different field names
+                const orderId = razorpayResponse.razorpay_order_id || razorpayResponse.order_id;
+                const paymentId = razorpayResponse.razorpay_payment_id || razorpayResponse.razorpay_response_id || razorpayResponse.payment_id;
+                const signature = razorpayResponse.razorpay_signature || razorpayResponse.signature;
+                
+                console.log('🔍 Extracted data:', { orderId, paymentId, signature });
+                
+                // Prepare verification data
+                const verificationData = {
+                    razorpay_order_id: orderId,
+                    razorpay_payment_id: paymentId,
+                    razorpay_signature: signature
+                };
+                
+                console.log('📤 Sending verification data:', verificationData);
+                
+                // Verify payment on server
+                const verifyResponse = await fetch('/payment/verify-payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(verificationData)
+                });
+
+                const verifyData = await verifyResponse.json();
+                console.log('📥 Verification response:', verifyData);
+                
+                if (verifyData.success) {
+                    console.log('✅ Payment verified successfully!');
+                    alert('Test mode: Payment simulation successful!');
+                    // Redirect to success page
+                    window.location.href = '/payment/success';
+                } else {
+                    console.error('❌ Payment verification failed:', verifyData.message);
+                    alert('Test mode: Payment verification failed: ' + verifyData.message);
+                }
+            };
+            
+            // Call the handler with simulated data
+            await handler(simulatedResponse);
+            
+        } catch (error) {
+            console.error('💥 Test mode error:', error);
+            alert('Test mode failed: ' + error.message);
+        }
+    });
+    <% } %>
+</script>

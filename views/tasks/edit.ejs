@@ -1,0 +1,208 @@
+<% layout('/layouts/boilerplate') %>
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h2 mb-1">Edit Task</h1>
+                    <p class="text-muted mb-0">Update task information for "<%= task.title %>"</p>
+                </div>
+                <div>
+                    <a href="/tasks/<%= task._id %>" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Task
+                    </a>
+                </div>
+            </div>
+            <div class="card shadow border-0">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-edit me-2"></i>Edit Task Information</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form action="/tasks/<%= task._id %>?_method=PUT" method="POST" class="needs-validation" novalidate>
+                        <!-- Basic Information -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-3">
+                                    <i class="fas fa-info-circle me-2"></i>Basic Information
+                                </h6>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label for="title" class="form-label">Task Title *</label>
+                                    <input type="text" class="form-control" id="title" name="title" value="<%= task.title %>" required>
+                                    <div class="invalid-feedback">Please provide a task title.</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="type" class="form-label">Task Type *</label>
+                                    <select class="form-select" id="type" name="type" required>
+                                        <option value="">Select type</option>
+                                        <option value="call" <%= task.type === 'call' ? 'selected' : '' %>>Call</option>
+                                        <option value="email" <%= task.type === 'email' ? 'selected' : '' %>>Email</option>
+                                        <option value="meeting" <%= task.type === 'meeting' ? 'selected' : '' %>>Meeting</option>
+                                        <option value="follow_up" <%= task.type === 'follow_up' ? 'selected' : '' %>>Follow Up</option>
+                                        <option value="property_viewing" <%= task.type === 'property_viewing' ? 'selected' : '' %>>Property Viewing</option>
+                                        <option value="documentation" <%= task.type === 'documentation' ? 'selected' : '' %>>Documentation</option>
+                                        <option value="other" <%= task.type === 'other' ? 'selected' : '' %>>Other</option>
+                                    </select>
+                                    <div class="invalid-feedback">Please select a task type.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-4">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="4" placeholder="Describe the task details..."><%= task.description || '' %></textarea>
+                        </div>
+
+                        <!-- Assignment and Timeline -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-3">
+                                    <i class="fas fa-calendar me-2"></i>Assignment & Timeline
+                                </h6>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="assignedTo" class="form-label">Assigned To</label>
+                                    <select class="form-select" id="assignedTo" name="assignedTo">
+                                        <option value="">Select assignee</option>
+                                        <% if (users && users.length > 0) { %>
+                                            <% users.forEach(user => { %>
+                                                <option value="<%= user._id %>" <%= task.assignedTo && task.assignedTo.toString() === user._id.toString() ? 'selected' : '' %>>
+                                                    <%= user.firstName %> <%= user.lastName %> (<%= user.role %>)
+                                                </option>
+                                            <% }); %>
+                                        <% } %>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="dueDate" class="form-label">Due Date *</label>
+                                    <input type="date" class="form-control" id="dueDate" name="dueDate" value="<%= new Date(task.dueDate).toISOString().split('T')[0] %>" required>
+                                    <div class="invalid-feedback">Please select a due date.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Priority and Status -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-3">
+                                    <i class="fas fa-cog me-2"></i>Priority & Status
+                                </h6>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="priority" class="form-label">Priority *</label>
+                                    <select class="form-select" id="priority" name="priority" required>
+                                        <option value="">Select priority</option>
+                                        <option value="low" <%= task.priority === 'low' ? 'selected' : '' %>>Low</option>
+                                        <option value="medium" <%= task.priority === 'medium' ? 'selected' : '' %>>Medium</option>
+                                        <option value="high" <%= task.priority === 'high' ? 'selected' : '' %>>High</option>
+                                    </select>
+                                    <div class="invalid-feedback">Please select a priority level.</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="status" class="form-label">Status *</label>
+                                    <select class="form-select" id="status" name="status" required>
+                                        <option value="pending" <%= task.status === 'pending' ? 'selected' : '' %>>Pending</option>
+                                        <option value="in_progress" <%= task.status === 'in_progress' ? 'selected' : '' %>>In Progress</option>
+                                        <option value="completed" <%= task.status === 'completed' ? 'selected' : '' %>>Completed</option>
+                                        <option value="cancelled" <%= task.status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Related Items -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-3">
+                                    <i class="fas fa-link me-2"></i>Related Items
+                                </h6>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="lead" class="form-label">Related Lead</label>
+                                    <select class="form-select" id="lead" name="lead">
+                                        <option value="">Select lead (optional)</option>
+                                        <% if (leads && leads.length > 0) { %>
+                                            <% leads.forEach(lead => { %>
+                                                <option value="<%= lead._id %>" <%= task.lead && task.lead.toString() === lead._id.toString() ? 'selected' : '' %>>
+                                                    <%= lead.firstName %> <%= lead.lastName %> - <%= lead.email %>
+                                                </option>
+                                            <% }); %>
+                                        <% } %>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="property" class="form-label">Related Property</label>
+                                    <select class="form-select" id="property" name="property">
+                                        <option value="">Select property (optional)</option>
+                                        <% if (properties && properties.length > 0) { %>
+                                            <% properties.forEach(property => { %>
+                                                <option value="<%= property._id %>" <%= task.property && task.property.toString() === property._id.toString() ? 'selected' : '' %>>
+                                                    <%= property.title %> - <%= property.address %>
+                                                </option>
+                                            <% }); %>
+                                        <% } %>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Estimated Time -->
+                        <div class="mb-4">
+                            <label for="estimatedHours" class="form-label">Estimated Hours</label>
+                            <input type="number" class="form-control" id="estimatedHours" name="estimatedHours" value="<%= task.estimatedHours || '' %>" min="0" step="0.5" placeholder="e.g., 2.5">
+                            <div class="form-text">Estimated time to complete this task in hours</div>
+                        </div>
+
+                        <!-- Submit Buttons -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="button" class="btn btn-outline-secondary me-md-2" onclick="history.back()">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Update Task
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Form validation
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+
+// Set minimum date to today for due date
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('dueDate').setAttribute('min', today);
+});
+</script>

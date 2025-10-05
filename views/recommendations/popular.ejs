@@ -1,0 +1,491 @@
+<% layout("/layouts/boilerplate") %>
+
+<style>
+    .recommendations-hero {
+        background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+        padding: 3rem 0;
+        color: white;
+        margin-bottom: 2rem;
+    }
+
+    .recommendations-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+
+    .recommendation-card {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .recommendation-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    .recommendation-image {
+        height: 250px;
+        width: 100%;
+        object-fit: cover;
+    }
+
+    .recommendation-badge {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: #9b59b6;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .recommendation-content {
+        padding: 1.5rem;
+    }
+
+    .recommendation-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+        line-height: 1.3;
+    }
+
+    .recommendation-location {
+        color: #7f8c8d;
+        font-size: 1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .recommendation-price {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #27ae60;
+        margin-bottom: 1rem;
+    }
+
+    .recommendation-details {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+        color: #7f8c8d;
+    }
+
+    .recommendation-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .btn-primary {
+        background: #9b59b6;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        text-decoration: none;
+        text-align: center;
+        flex: 1;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background: #8e44ad;
+        transform: translateY(-2px);
+        color: white;
+    }
+
+    .favorite-btn {
+        background: #ff6b6b;
+        color: white;
+        border: none;
+        padding: 0.75rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 1.2rem;
+    }
+
+    .favorite-btn:hover {
+        background: #ff5252;
+        transform: scale(1.1);
+    }
+
+    .favorite-btn.favorited {
+        background: #e74c3c;
+    }
+
+    .recommendation-score {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        background: rgba(0,0,0,0.8);
+        color: white;
+        padding: 0.5rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .score-excellent {
+        background: #27ae60;
+    }
+
+    .score-good {
+        background: #f39c12;
+    }
+
+    .score-fair {
+        background: #e74c3c;
+    }
+
+    .recommendation-reasons {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+        border-left: 4px solid #9b59b6;
+    }
+
+    .reasons-title {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+
+    .reason-tag {
+        display: inline-block;
+        background: #9b59b6;
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        margin: 0.25rem;
+    }
+
+    .filters-section {
+        background: white;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+
+    .filter-row {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .filter-select {
+        padding: 0.5rem 1rem;
+        border: 2px solid #e1e8ed;
+        border-radius: 8px;
+        font-size: 1rem;
+        background: white;
+        cursor: pointer;
+        min-width: 150px;
+    }
+
+    .filter-select:focus {
+        outline: none;
+        border-color: #9b59b6;
+    }
+
+    .stats-section {
+        background: white;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .stat-item {
+        text-align: center;
+        padding: 1.5rem;
+        background: #f8f9fa;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .stat-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #9b59b6;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+    }
+
+    .no-recommendations {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #7f8c8d;
+    }
+
+    .no-recommendations h3 {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        color: #2c3e50;
+    }
+
+    .no-recommendations p {
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+
+    .browse-btn {
+        background: #9b59b6;
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: 25px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-block;
+    }
+
+    .browse-btn:hover {
+        background: #8e44ad;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(155, 89, 182, 0.3);
+        color: white;
+    }
+
+    @media (max-width: 768px) {
+        .recommendations-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .filter-row {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .filter-select {
+            min-width: auto;
+        }
+    }
+</style>
+
+<div class="recommendations-hero">
+    <div class="container">
+        <h1 class="text-center mb-4">Popular Properties</h1>
+        <p class="text-center mb-4">Discover the most sought-after properties based on views, inquiries, and market trends</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="stats-section">
+        <h4 class="mb-3">Recommendation Statistics</h4>
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-number"><%= stats?.totalRecommendations || 0 %></div>
+                <div class="stat-label">Total Recommendations</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number"><%= stats?.averageScore || 0 %></div>
+                <div class="stat-label">Average Score</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number"><%= stats?.topRated || 0 %></div>
+                <div class="stat-label">Top Rated (90+%)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number"><%= stats?.trending || 0 %></div>
+                <div class="stat-label">Trending Now</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="filters-section">
+        <div class="filter-row">
+            <select class="filter-select" onchange="filterRecommendations('score', this.value)">
+                <option value="">All Scores</option>
+                <option value="90-100">Excellent (90-100%)</option>
+                <option value="80-89">Good (80-89%)</option>
+                <option value="70-79">Fair (70-79%)</option>
+                <option value="60-69">Average (60-69%)</option>
+            </select>
+            
+            <select class="filter-select" onchange="filterRecommendations('propertyType', this.value)">
+                <option value="">All Property Types</option>
+                <option value="apartment">Apartment</option>
+                <option value="house">House</option>
+                <option value="villa">Villa</option>
+                <option value="commercial">Commercial</option>
+                <option value="land">Land</option>
+            </select>
+            
+            <select class="filter-select" onchange="filterRecommendations('listingType', this.value)">
+                <option value="">All Listing Types</option>
+                <option value="sale">For Sale</option>
+                <option value="rent">For Rent</option>
+            </select>
+            
+            <select class="filter-select" onchange="filterRecommendations('sortBy', this.value)">
+                <option value="score">Sort by Score</option>
+                <option value="views">Sort by Views</option>
+                <option value="inquiries">Sort by Inquiries</option>
+                <option value="price">Sort by Price</option>
+                <option value="date">Sort by Date</option>
+            </select>
+        </div>
+    </div>
+
+    <% if (recommendations && recommendations.length > 0) { %>
+    <div class="recommendations-grid">
+        <% recommendations.forEach(recommendation => { %>
+        <div class="recommendation-card" data-score="<%= recommendation.score %>" 
+             data-property-type="<%= recommendation.listing.propertyType %>"
+             data-listing-type="<%= recommendation.listing.listingType %>">
+            
+            <div class="recommendation-score <%= recommendation.score >= 90 ? 'score-excellent' : recommendation.score >= 80 ? 'score-good' : 'score-fair' %>">
+                <%= recommendation.score %>% Match
+            </div>
+            
+            <% if (recommendation.listing.featured) { %>
+            <div class="recommendation-badge">Featured</div>
+            <% } %>
+            
+            <img src="<%= recommendation.listing.images && recommendation.listing.images.length > 0 ? recommendation.listing.images[0].url : '/images/default-property.jpg' %>" 
+                 alt="<%= recommendation.listing.title %>" class="recommendation-image">
+            
+            <div class="recommendation-content">
+                <h3 class="recommendation-title"><%= recommendation.listing.title %></h3>
+                
+                <div class="recommendation-location">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <%= recommendation.listing.address.city %>, <%= recommendation.listing.address.state %>
+                </div>
+                
+                <div class="recommendation-price">
+                    ₹<%= recommendation.listing.price.amount.toLocaleString() %>
+                    <span style="font-size: 0.9rem; color: #7f8c8d;">
+                        <%= recommendation.listing.listingType === 'rent' ? '/month' : '' %>
+                    </span>
+                </div>
+                
+                <div class="recommendation-details">
+                    <span><i class="fas fa-bed"></i> <%= recommendation.listing.bedrooms || 'N/A' %> Beds</span>
+                    <span><i class="fas fa-bath"></i> <%= recommendation.listing.bathrooms || 'N/A' %> Baths</span>
+                    <span><i class="fas fa-ruler-combined"></i> <%= recommendation.listing.area ? recommendation.listing.area.size + ' ' + recommendation.listing.area.unit : 'N/A' %></span>
+                </div>
+
+                <div class="recommendation-reasons">
+                    <div class="reasons-title">Why this property matches you:</div>
+                    <% recommendation.reasons.forEach(reason => { %>
+                        <span class="reason-tag"><%= reason.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) %></span>
+                    <% }); %>
+                </div>
+                
+                <div class="recommendation-actions">
+                    <a href="/listings/<%= recommendation.listing._id %>" class="btn-primary">View Details</a>
+                    <button class="favorite-btn <%= locals.user && locals.userFavorites && locals.userFavorites.includes(recommendation.listing._id.toString()) ? 'favorited' : '' %>" 
+                            onclick="toggleFavorite('<%= recommendation.listing._id %>')" 
+                            data-listing-id="<%= recommendation.listing._id %>">
+                        <i class="fas fa-heart"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <% }); %>
+    </div>
+    <% } else { %>
+    <div class="no-recommendations">
+        <h3>No recommendations available</h3>
+        <p>We're working on finding the perfect properties for you. In the meantime, browse our available properties.</p>
+        <a href="/listings" class="browse-btn">Browse Properties</a>
+    </div>
+    <% } %>
+</div>
+
+<script>
+function filterRecommendations(filterType, value) {
+    const cards = document.querySelectorAll('.recommendation-card');
+    
+    cards.forEach(card => {
+        let show = true;
+        
+        if (filterType === 'score' && value) {
+            const score = parseInt(card.dataset.score);
+            if (value === '90-100' && score < 90) show = false;
+            if (value === '80-89' && (score < 80 || score >= 90)) show = false;
+            if (value === '70-79' && (score < 70 || score >= 80)) show = false;
+            if (value === '60-69' && (score < 60 || score >= 70)) show = false;
+        }
+        
+        if (filterType === 'propertyType' && value && card.dataset.propertyType !== value) {
+            show = false;
+        }
+        
+        if (filterType === 'listingType' && value && card.dataset.listingType !== value) {
+            show = false;
+        }
+        
+        card.style.display = show ? 'block' : 'none';
+    });
+}
+
+async function toggleFavorite(listingId) {
+    try {
+        const response = await fetch('/favorites/toggle', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ listingId })
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            const btn = document.querySelector(`[data-listing-id="${listingId}"]`);
+            
+            if (result.isFavorited) {
+                btn.classList.add('favorited');
+                btn.innerHTML = '<i class="fas fa-heart"></i>';
+            } else {
+                btn.classList.remove('favorited');
+                btn.innerHTML = '<i class="far fa-heart"></i>';
+            }
+        }
+    } catch (error) {
+        console.error('Error toggling favorite:', error);
+    }
+}
+
+// Auto-sort when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    const sortSelect = document.querySelector('select[onchange*="sortBy"]');
+    if (sortSelect) {
+        sortSelect.value = 'score';
+    }
+});
+</script>

@@ -1,118 +1,743 @@
 <% layout("/layouts/boilerplate") %>
 
 <style>
-    #filters {
+    .search-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        color: white;
+    }
+
+    .search-form {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 1.5rem;
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
+    }
+
+    .filter-buttons {
         display: flex;
         flex-wrap: wrap;
-        align-items: center;
-        justify-content: space-around;
+        gap: 1rem;
+        justify-content: center;
+        margin: 2rem 0;
     }
 
-    .filter {
-        text-align: center;
-        margin-inline: 1rem;
-        margin-top: 1rem;
-        opacity: 0.7;
-        transition: all 0.3s ease-in-out;
+    .filter-btn {
+        padding: 0.5rem 1rem;
+        border: 2px solid #667eea;
+        border-radius: 25px;
+        background: white;
+        color: #667eea;
+        transition: all 0.3s ease;
         cursor: pointer;
+        font-weight: 500;
     }
 
-    .filter:hover {
-        opacity: 1;
+    .filter-btn:hover, .filter-btn.active {
+        background: #667eea;
+        color: white;
+        transform: translateY(-2px);
     }
 
-    .filter p {
+    .listing-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        margin-bottom: 1.5rem;
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .listing-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    .listing-image {
+        height: 250px;
+        object-fit: cover;
+        width: 100%;
+    }
+
+    .listing-badge {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: #ff6b6b;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
         font-size: 0.8rem;
+        font-weight: 600;
     }
 
-    .tax-info {
-        display: none;
+    .price-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1rem;
     }
 
-    .tax-toggle {
-        border: 1px solid black;
-        border-radius: 1rem;
-        height: 3.25rem;
-        padding: 1rem;
-        margin-left: 3rem;
+    .price {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #2c3e50;
+    }
+
+    .price-unit {
+        font-size: 0.9rem;
+        color: #7f8c8d;
+    }
+
+    .property-details {
+        display: flex;
+        gap: 1rem;
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+        color: #7f8c8d;
+    }
+
+    .role-hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 4rem 0;
+        margin-bottom: 3rem;
+    }
+
+    .role-features {
+        background: #f8f9fa;
+        padding: 3rem 0;
+        margin: 3rem 0;
+    }
+
+    .feature-card {
+        text-align: center;
+        padding: 2rem 1rem;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+        height: 100%;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .feature-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .quick-actions {
+        background: white;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+
+    .action-btn {
         display: flex;
         align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        border-radius: 10px;
+        text-decoration: none;
+        color: white;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        margin: 0.5rem;
     }
+
+    .action-btn:hover {
+        transform: translateY(-2px);
+        color: white;
+        text-decoration: none;
+    }
+
+    .action-btn.primary { background: #667eea; }
+    .action-btn.success { background: #28a745; }
+    .action-btn.info { background: #17a2b8; }
+    .action-btn.warning { background: #ffc107; color: #212529; }
 </style>
 
-<div id="filters">
-    <!-- <div class="filter">
-        <div><i class="fa-solid fa-fire"></i></div>
-        <p>Trending</p>
+<!-- Role-based Hero Section -->
+<% if (currUser) { %>
+    <div class="role-hero">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <% if (currUser.userType === 'buyer') { %>
+                        <h1 class="display-4 mb-3">Find Your Dream Home</h1>
+                        <p class="lead mb-4">Discover thousands of properties with advanced search, personalized recommendations, and instant contact options.</p>
+                        <div class="d-flex gap-3">
+                            <a href="#searchSection" class="btn btn-light btn-lg scroll-to-search">
+                                <i class="fas fa-search me-2"></i>Search Properties
+                            </a>
+                            <a href="/favorites" class="btn btn-outline-light btn-lg">
+                                <i class="fas fa-heart me-2"></i>My Favorites
+                            </a>
+                        </div>
+                    <% } else if (currUser.userType === 'property_owner') { %>
+                        <h1 class="display-4 mb-3">Manage Your Properties</h1>
+                        <p class="lead mb-4">Track performance, manage inquiries, and optimize your listings to reach more potential buyers.</p>
+                        <div class="d-flex gap-3">
+                            <a href="/listings/dashboard" class="btn btn-light btn-lg">
+                                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                            </a>
+                            <a href="/listings/new" class="btn btn-outline-light btn-lg">
+                                <i class="fas fa-plus me-2"></i>Add Listing
+                            </a>
+                        </div>
+                    <% } else if (currUser.userType === 'broker') { %>
+                        <h1 class="display-4 mb-3">Lead Management & CRM</h1>
+                        <p class="lead mb-4">Track leads, manage client relationships, and close more deals with our comprehensive CRM tools.</p>
+                        <div class="d-flex gap-3">
+                            <a href="/listings/dashboard" class="btn btn-light btn-lg">
+                                <i class="fas fa-tachometer-alt me-2"></i>CRM Dashboard
+                            </a>
+                            <a href="/leads" class="btn btn-outline-light btn-lg">
+                                <i class="fas fa-users me-2"></i>Manage Leads
+                            </a>
+                        </div>
+                    <% } %>
+                </div>
+                <div class="col-lg-4 text-center">
+                    <i class="fas fa-user-circle fa-8x opacity-75"></i>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="filter">
-        <div><i class="fa-solid fa-bed"></i></div>
-        <p>Rooms</p>
+
+    <!-- Quick Actions Section -->
+    <div class="container">
+        <div class="quick-actions">
+            <h3 class="mb-4">Quick Actions</h3>
+            <div class="row">
+                <% if (currUser.userType === 'buyer') { %>
+                    <div class="col-md-3">
+                        <a href="#searchSection" class="action-btn primary w-100 scroll-to-search">
+                            <i class="fas fa-search me-2"></i>Search Properties
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="/favorites" class="action-btn success w-100">
+                            <i class="fas fa-heart me-2"></i>My Favorites
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="/recommendations/personalized" class="action-btn info w-100">
+                            <i class="fas fa-lightbulb me-2"></i>Recommendations
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="/profile" class="action-btn warning w-100">
+                            <i class="fas fa-user-cog me-2"></i>My Profile
+                        </a>
+                    </div>
+                <% } else if (currUser.userType === 'property_owner') { %>
+                    <div class="col-md-6">
+                        <a href="/listings/new" class="action-btn success w-100">
+                            <i class="fas fa-plus me-2"></i>Add Listing
+                        </a>
+                    </div>
+                    <div class="col-md-6">
+                        <a href="/leads" class="action-btn warning w-100">
+                            <i class="fas fa-users me-2"></i>View Leads
+                        </a>
+                    </div>
+                <% } else if (currUser.userType === 'broker') { %>
+                    <div class="col-md-3">
+                        <a href="/listings/dashboard" class="action-btn primary w-100">
+                            <i class="fas fa-tachometer-alt me-2"></i>CRM Dashboard
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="/leads" class="action-btn success w-100">
+                            <i class="fas fa-users me-2"></i>Manage Leads
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="/tasks" class="action-btn info w-100">
+                            <i class="fas fa-tasks me-2"></i>My Tasks
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="/profile" class="action-btn warning w-100">
+                            <i class="fas fa-user-cog me-2"></i>My Profile
+                        </a>
+                    </div>
+                <% } %>
+            </div>
+        </div>
     </div>
-    <div class="filter">
-        <div><i class="fa-solid fa-mountain-city"></i></div>
-        <p>Iconic cities</p>
+
+    <!-- Role-specific Features Section -->
+    <div class="role-features">
+        <div class="container">
+            <h2 class="text-center mb-5">Your Features</h2>
+            <div class="row">
+                <% if (currUser.userType === 'buyer') { %>
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="feature-card">
+                            <i class="fas fa-search feature-icon text-primary"></i>
+                            <h5>Advanced Search</h5>
+                            <p>Find properties by location, price, type, and more with our powerful search filters.</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="feature-card">
+                            <i class="fas fa-heart feature-icon text-danger"></i>
+                            <h5>Save Favorites</h5>
+                            <p>Save your favorite properties and get notified about price changes and updates.</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="feature-card">
+                            <i class="fas fa-phone feature-icon text-success"></i>
+                            <h5>Contact Options</h5>
+                            <p>Request visits, contact owners directly, or schedule viewings with ease.</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="feature-card">
+                            <i class="fas fa-lightbulb feature-icon text-warning"></i>
+                            <h5>Smart Recommendations</h5>
+                            <p>Get personalized property recommendations based on your preferences and behavior.</p>
+                        </div>
+                    </div>
+                <% } else if (currUser.userType === 'property_owner') { %>
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="feature-card">
+                            <i class="fas fa-plus feature-icon text-success"></i>
+                            <h5>Listing Management</h5>
+                            <p>Create, edit, and manage your property listings with media uploads and detailed information.</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="feature-card">
+                            <i class="fas fa-chart-line feature-icon text-primary"></i>
+                            <h5>Performance Tracking</h5>
+                            <p>Monitor views, inquiries, and performance metrics for all your listings.</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="feature-card">
+                            <i class="fas fa-user-tie feature-icon text-info"></i>
+                            <h5>Broker Assignment</h5>
+                            <p>Assign professional brokers to your listings for better market reach and sales.</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="feature-card">
+                            <i class="fas fa-tags feature-icon text-warning"></i>
+                            <h5>Status Management</h5>
+                            <p>Update property status (active, under offer, sold) and track the complete sales process.</p>
+                        </div>
+                    </div>
+                <% } else if (currUser.userType === 'broker') { %>
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="feature-card">
+                            <i class="fas fa-users feature-icon text-primary"></i>
+                            <h5>Lead Management</h5>
+                            <p>Auto-capture leads from user interactions and manage them through different stages.</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="feature-card">
+                            <i class="fas fa-tasks feature-icon text-success"></i>
+                            <h5>Task Management</h5>
+                            <p>Create tasks, set reminders, and track follow-ups for better client relationship management.</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="feature-card">
+                            <i class="fas fa-comments feature-icon text-info"></i>
+                            <h5>Internal Messaging</h5>
+                            <p>Communicate with team members and clients through our integrated messaging system.</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="feature-card">
+                            <i class="fas fa-chart-pie feature-icon text-warning"></i>
+                            <h5>CRM Analytics</h5>
+                            <p>Track your performance, conversion rates, and client interactions with detailed analytics.</p>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+        </div>
     </div>
-    <div class="filter">
-        <div><i class="fa-solid fa-mountain"></i></div>
-        <p>Mountains</p>
+<% } else { %>
+    <!-- Guest User Welcome Section -->
+    <div class="role-hero">
+        <div class="container text-center">
+                            <h1 class="display-4 mb-3">Welcome to Karnavat&Associates</h1>
+            <p class="lead mb-4">Your comprehensive real estate platform for property discovery, management, and lead generation.</p>
+            <div class="d-flex gap-3 justify-content-center">
+                <a href="/login" class="btn btn-light btn-lg">
+                    <i class="fas fa-sign-in-alt me-2"></i>Login
+                </a>
+                <a href="/signup" class="btn btn-outline-light btn-lg">
+                    <i class="fas fa-user-plus me-2"></i>Sign Up
+                </a>
+            </div>
+        </div>
     </div>
-    <div class="filter">
-        <div><i class="fa-brands fa-fort-awesome"></i></div>
-        <p>Castles</p>
+
+    <!-- Guest Features Overview -->
+    <div class="role-features">
+        <div class="container">
+            <h2 class="text-center mb-5">Platform Features</h2>
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <div class="feature-card">
+                        <i class="fas fa-home feature-icon text-primary"></i>
+                        <h5>Property Discovery</h5>
+                        <p>Advanced search, filters, and personalized recommendations for buyers and renters.</p>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <div class="feature-card">
+                        <i class="fas fa-building feature-icon text-success"></i>
+                        <h5>Listing Management</h5>
+                        <p>Comprehensive tools for property owners to manage listings, track performance, and connect with buyers.</p>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <div class="feature-card">
+                        <i class="fas fa-user-tie feature-icon text-info"></i>
+                        <h5>Lead Management & CRM</h5>
+                        <p>Professional CRM tools for brokers to manage leads, track interactions, and close more deals.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="filter">
-        <div><i class="fa-solid fa-person-swimming"></i></div>
-        <p>Amazing pools</p>
-    </div>
-    <div class="filter">
-        <div><i class="fa-solid fa-campground"></i></div>
-        <p>Camping</p>
-    </div>
-    <div class="filter">
-        <div><i class="fa-solid fa-tractor"></i></div>
-        <p>Farms</p>
-    </div>
-    <div class="filter">
-        <div><i class="fa-regular fa-snowflake"></i></div>
-        <p>Arctic</p>
-    </div> -->
-    <div class="tax-toggle">
-        <div class="form-check-reverse form-switch">
-            <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
-            <label class="form-check-label" for="flexSwitchCheckDefault">Display total after taxes</label>
+<% } %>
+
+<!-- Property Listings Section -->
+<div class="container">
+    <div class="search-section" id="searchSection">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <h2 class="text-center mb-4">Find Your Perfect Property</h2>
+                    <!-- Home quick search: copy values into main search form and submit -->
+                    <div class="search-form d-block text-reset">
+    <div class="row g-3 align-items-center">
+        <div class="col-md-4">
+            <input type="text" id="home_location" class="form-control" placeholder="Location" value="">
+        </div>
+        <div class="col-md-3">
+            <select id="home_propertyType" class="form-select">
+                <option value="">Property Type</option>
+                <option value="apartment">Apartment</option>
+                <option value="house">House</option>
+                <option value="villa">Villa</option>
+                <option value="commercial">Commercial</option>
+                <option value="land">Land</option>
+                <option value="office">Office</option>
+                <option value="shop">Shop</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select id="home_listingType" class="form-select">
+                <option value="">Purpose (Sale/Rent)</option>
+                <option value="sale">Sale</option>
+                <option value="rent">Rent</option>
+            </select>
+        </div>
+        <div class="col-md-2 text-end">
+            <button type="button" id="homeSearchBtn" class="btn btn-light w-100">
+                <i class="fas fa-search"></i>
+            </button>
         </div>
     </div>
 </div>
-
-<div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 mt-3">
-    <% for(let listing of allListings) { %>
-        <a href="/listings/<%= listing._id %>" class="listing-link">
-            <div class="card col listing-card">
-                <img src="<%= listing.image.url %>" class="card-img-top" alt="listing_image" style="height: 20rem;">
-                <div class="card-img-overlay"></div>
-                <div class="card-body">
-                    <p class="card-text">
-                    <b><%= listing.title %></b> <br>
-                    &#8377; <%= listing.price.toLocaleString("en-IN") %> / night
-                    <i class="tax-info"> &nbsp; &nbsp;+18% GST</i>
-                </p>
                 </div>
             </div>
-        </a>
-    <% } %>
+        </div>
+    </div>
+
+    <!-- Filter Buttons -->
+    <div class="filter-buttons">
+        <button class="filter-btn active" data-filter="all">All Properties</button>
+        <button class="filter-btn" data-filter="apartment">Apartments</button>
+        <button class="filter-btn" data-filter="house">Houses</button>
+        <button class="filter-btn" data-filter="villa">Villas</button>
+        <button class="filter-btn" data-filter="commercial">Commercial</button>
+        <button class="filter-btn" data-filter="land">Land</button>
+        <button class="filter-btn" data-filter="office">Office</button>
+        <button class="filter-btn" data-filter="shop">Shop</button>
+    </div>
+
+    <!-- Property Listings Grid -->
+    <div class="row" id="listingsGrid">
+        <% for (let listing of listings) { %>
+            <div class="col-lg-4 col-md-6 mb-4" data-type="<%= listing.propertyType %>" data-listing-type="<%= listing.listingType %>" data-location="<%= listing.address ? (listing.address.city + ', ' + listing.address.state) : '' %>">
+                <div class="card listing-card">
+                    <div class="position-relative">
+                        <% if (listing.images && listing.images.length > 0) { %>
+                            <img src="<%= listing.images[0].url %>" class="listing-image" alt="<%= listing.title %>">
+                        <% } else { %>
+                            <div class="listing-image-placeholder d-flex align-items-center justify-content-center bg-light text-muted">
+                                <i class="fas fa-home fa-3x"></i>
+                            </div>
+                        <% } %>
+                        <% if (listing.listingType === 'rent') { %>
+                            <span class="listing-badge">For Rent</span>
+                        <% } else { %>
+                            <span class="listing-badge">For Sale</span>
+                        <% } %>
+                        
+                        <!-- Special Owner Badge -->
+                        <% if (listing.owner && listing.owner.isSpecialOwner) { %>
+                            <span class="special-owner-badge">
+                                <i class="fas fa-crown me-1"></i>
+                                Special Owner
+                            </span>
+                        <% } %>
+                        
+
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title"><%= listing.title %></h5>
+                        <p class="card-text text-muted"><%= listing.address ? listing.address.city : 'Location not specified' %></p>
+                        
+                        <div class="property-details">
+                            <span><i class="fas fa-bed me-1"></i><%= listing.bedrooms || 'N/A' %> Beds</span>
+                            <span><i class="fas fa-bath me-1"></i><%= listing.bathrooms || 'N/A' %> Baths</span>
+                            <span><i class="fas fa-ruler-combined me-1"></i><%= listing.area ? listing.area.size : 'N/A' %> <%= listing.area ? listing.area.unit : 'sqft' %></span>
+                        </div>
+                        
+                        <!-- Owner Information -->
+                        <div class="owner-info">
+                            <small class="text-muted">
+                                <i class="fas fa-user me-1"></i>
+                                <%= listing.owner ? (listing.owner.companyName || `${listing.owner.firstName} ${listing.owner.lastName}`) : 'Owner' %>
+                                <% if (listing.owner && listing.owner.isSpecialOwner) { %>
+                                    <span class="badge bg-warning text-dark ms-2">
+                                        <i class="fas fa-crown me-1"></i>
+                                        Special
+                                    </span>
+                                <% } %>
+                            </small>
+                        </div>
+                        
+                        <div class="price-section">
+                            <div>
+                                <span class="price">₹<%= listing.price.amount ? listing.price.amount.toLocaleString() : 'N/A' %></span>
+                                <span class="price-unit"><%= listing.listingType === 'rent' ? '/month' : '' %></span>
+                            </div>
+                            <a href="/listings/<%= listing._id %>" class="btn btn-outline-primary btn-sm">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <% } %>
+    </div>
 </div>
 
+<style>
+.listing-image-placeholder {
+    height: 200px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+}
+
+.listing-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.listing-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+    height: 100%;
+}
+
+.listing-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.listing-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+}
+
+
+.special-owner-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: linear-gradient(135deg, #ffd700, #ffed4e);
+    color: #212529;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 11px;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+}
+
+.owner-info {
+    margin: 10px 0;
+    padding: 8px 0;
+    border-top: 1px solid #e9ecef;
+}
+
+.property-details {
+    display: flex;
+    justify-content: space-between;
+    margin: 15px 0;
+    font-size: 14px;
+    color: #6c757d;
+}
+
+.price-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+}
+
+.price {
+    font-size: 18px;
+    font-weight: bold;
+    color: #28a745;
+}
+
+.price-unit {
+    font-size: 14px;
+    color: #6c757d;
+}
+
+.filter-buttons {
+    text-align: center;
+    margin: 30px 0;
+}
+
+.filter-btn {
+    background: none;
+    border: 2px solid #dee2e6;
+    color: #6c757d;
+    padding: 8px 20px;
+    margin: 0 5px;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.filter-btn:hover,
+.filter-btn.active {
+    background: #007bff;
+    border-color: #007bff;
+    color: white;
+}
+</style>
+
 <script>
-    const taxSwitch = document.getElementById("flexSwitchCheckDefault");
-    taxSwitch.addEventListener("click", () => {
-        let taxInfo = document.getElementsByClassName("tax-info");
-        for(info of taxInfo) {
-            if(info.style.display !== "inline") {
-                info.style.display = "inline";
+// Filter functionality
+document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        // Remove active class from all buttons
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        // Add active class to clicked button
+        this.classList.add('active');
+        
+        const filter = this.getAttribute('data-filter');
+        const listings = document.querySelectorAll('#listingsGrid .col-lg-4');
+        
+        listings.forEach(listing => {
+            if (filter === 'all' || listing.getAttribute('data-type') === filter) {
+                listing.style.display = 'block';
             } else {
-                info.style.display = "none";
+                listing.style.display = 'none';
             }
+        });
+    });
+});
+</script>
+
+<script>
+// Smooth scroll to search section when anchor clicked
+document.querySelectorAll('.scroll-to-search').forEach(el => {
+    el.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.getElementById('searchSection');
+        if (target) {
+            // If we're already on the dedicated search page, scroll down to the search/results area
+            if (window.location.pathname === '/listings/search') {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                return;
+            }
+            // Otherwise, keep users on the same screen and focus the first input inside the search section
+            const input = target.querySelector('input, select, textarea');
+            if (input) {
+                input.focus();
+                try { input.style.outline = '3px solid rgba(102,126,234,0.25)'; setTimeout(() => input.style.outline = '', 1200); } catch(e){}
+            }
+        } else {
+            // fallback: follow href
+            window.location.href = this.getAttribute('href');
         }
     });
+});
+</script>
+
+<script>
+// On page load, if URL requests the search section, smooth-scroll to it and focus the input
+document.addEventListener('DOMContentLoaded', function() {
+    const target = document.getElementById('searchSection');
+    if (!target) return;
+    const shouldScroll = (window.location.hash === '#searchSection') || (window.location.pathname === '/listings/search');
+    if (shouldScroll) {
+        try {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            const input = target.querySelector('input, select, textarea');
+            if (input) { input.focus(); try { input.style.outline = '3px solid rgba(102,126,234,0.25)'; setTimeout(() => input.style.outline = '', 1200); } catch(e){} }
+        } catch (e) { /* ignore in older browsers */ }
+    }
+});
+</script>
+
+<script>
+// Home quick-search: filter listings in-place (no navigation)
+const homeSearchBtn = document.getElementById('homeSearchBtn');
+if (homeSearchBtn) {
+    homeSearchBtn.addEventListener('click', function () {
+        const loc = document.getElementById('home_location')?.value.trim().toLowerCase();
+        const type = document.getElementById('home_propertyType')?.value;
+        const listingType = document.getElementById('home_listingType')?.value;
+
+        const listings = document.querySelectorAll('#listingsGrid .col-lg-4');
+        listings.forEach(card => {
+            const cardType = (card.getAttribute('data-type') || '').toLowerCase();
+            const cardListingType = (card.getAttribute('data-listing-type') || '').toLowerCase();
+            const cardLocation = (card.getAttribute('data-location') || '').toLowerCase();
+
+            let visible = true;
+            if (type && type !== '') {
+                visible = visible && (cardType === type.toLowerCase());
+            }
+            if (listingType && listingType !== '') {
+                visible = visible && (cardListingType === listingType.toLowerCase());
+            }
+            if (loc && loc !== '') {
+                visible = visible && (cardLocation.includes(loc));
+            }
+
+            card.style.display = visible ? 'block' : 'none';
+        });
+        // Scroll to listings grid so user sees the filtered results
+        const grid = document.getElementById('listingsGrid');
+        if (grid) grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+}
 </script>

@@ -1,0 +1,512 @@
+<% layout("/layouts/boilerplate") %>
+
+<style>
+    .favorites-page {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        min-height: 100vh;
+        padding: 0;
+    }
+
+    .favorites-header {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        padding: 2rem 0;
+        color: white;
+        margin-bottom: 2rem;
+    }
+
+    .favorites-content {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    .favorites-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 2rem;
+    }
+
+    .favorite-card {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        border: 1px solid #f1f3f4;
+    }
+
+    .favorite-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    .favorite-image {
+        height: 250px;
+        width: 100%;
+        object-fit: cover;
+    }
+
+    .favorite-badge {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: #ff6b6b;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .favorite-content {
+        padding: 1.5rem;
+    }
+
+    .favorite-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+        line-height: 1.3;
+    }
+
+    .favorite-location {
+        color: #7f8c8d;
+        font-size: 1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .favorite-details {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .detail-item {
+        text-align: center;
+        padding: 0.75rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .detail-value {
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 1.1rem;
+    }
+
+    .detail-label {
+        color: #7f8c8d;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+    }
+
+    .favorite-price {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #27ae60;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    .interest-level {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .interest-level.very_interested {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .interest-level.ready_to_buy {
+        background: #cce5ff;
+        color: #004085;
+    }
+
+    .interest-level.interested {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .favorite-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .btn-view {
+        flex: 1;
+        background: #667eea;
+        border: none;
+        color: white;
+        padding: 0.75rem;
+        border-radius: 8px;
+        text-decoration: none;
+        text-align: center;
+        transition: background 0.3s ease;
+        font-weight: 600;
+    }
+
+    .btn-view:hover {
+        background: #5a6fd8;
+        color: white;
+    }
+
+    .btn-remove {
+        background: #dc3545;
+        border: none;
+        color: white;
+        padding: 0.75rem;
+        border-radius: 8px;
+        transition: background 0.3s ease;
+        width: 50px;
+    }
+
+    .btn-remove:hover {
+        background: #c82333;
+        color: white;
+    }
+
+    .favorite-notes {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+    }
+
+    .notes-label {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+
+    .notes-content {
+        color: #7f8c8d;
+        font-style: italic;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+
+    .page-link {
+        padding: 0.75rem 1rem;
+        margin: 0 0.25rem;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        color: #667eea;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .page-link:hover {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+    }
+
+    .page-link.active {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #7f8c8d;
+    }
+
+    .empty-state i {
+        font-size: 5rem;
+        margin-bottom: 2rem;
+        opacity: 0.5;
+    }
+
+    .stats-bar {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #ff6b6b;
+    }
+
+    .stat-label {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+    }
+</style>
+
+<div class="favorites-page">
+    <!-- Header -->
+    <div class="favorites-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="mb-2">Your Favorite Properties</h1>
+                    <p class="mb-0">Properties you've saved for future reference</p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <a href="/buyers/dashboard" class="btn btn-light">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="favorites-content">
+            <!-- Statistics Bar -->
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <div class="stat-number"><%= favorites.length %></div>
+                    <div class="stat-label">Total Favorites</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number"><%= favorites.filter(f => f.buyerPreferences?.interestLevel === 'very_interested').length %></div>
+                    <div class="stat-label">Very Interested</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number"><%= favorites.filter(f => f.buyerPreferences?.interestLevel === 'ready_to_buy').length %></div>
+                    <div class="stat-label">Ready to Buy</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number"><%= favorites.filter(f => f.buyerPreferences?.timeline === 'immediate').length %></div>
+                    <div class="stat-label">Immediate Timeline</div>
+                </div>
+            </div>
+
+            <% if (favorites && favorites.length > 0) { %>
+                <div class="favorites-grid">
+                    <% favorites.forEach(favorite => { %>
+                        <div class="favorite-card">
+                            <div style="position: relative;">
+                                <img src="<%= favorite.property.images && favorite.property.images.length > 0 ? favorite.property.images[0].url : '/images/default-property.jpg' %>" 
+                                     alt="<%= favorite.property.title %>" class="favorite-image">
+                                <div class="favorite-badge">
+                                    <i class="fas fa-heart me-1"></i>Favorite
+                                </div>
+                            </div>
+                            
+                            <div class="favorite-content">
+                                <h3 class="favorite-title"><%= favorite.property.title %></h3>
+                                <div class="favorite-location">
+                                    <i class="fas fa-map-marker-alt me-2"></i>
+                                    <%= favorite.property.address?.city %>, <%= favorite.property.address?.state %>
+                                </div>
+                                
+                                <div class="favorite-details">
+                                    <div class="detail-item">
+                                        <div class="detail-value"><%= favorite.property.bedrooms || 'N/A' %></div>
+                                        <div class="detail-label">Bedrooms</div>
+                                    </div>
+                                    <div class="detail-item">
+                                        <div class="detail-value"><%= favorite.property.bathrooms || 'N/A' %></div>
+                                        <div class="detail-label">Bathrooms</div>
+                                    </div>
+                                    <div class="detail-item">
+                                        <div class="detail-value"><%= favorite.property.area?.size || 'N/A' %></div>
+                                        <div class="detail-label"><%= favorite.property.area?.unit || 'sqft' %></div>
+                                    </div>
+                                </div>
+
+                                <% if (favorite.property.locationScores && favorite.property.locationScores.overallScore) { %>
+                                    <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; padding: 0.5rem; background: #e8f5e8; border-radius: 8px;">
+                                        <i class="fas fa-map-pin text-success me-2"></i>
+                                        <span>Location Score:</span>
+                                        <strong class="text-success ms-1"><%= favorite.property.locationScores.overallScore %>/100</strong>
+                                    </div>
+                                <% } %>
+                                
+                                <div class="favorite-price">
+                                    ₹<%= favorite.property.price?.amount?.toLocaleString() || 'N/A' %>
+                                    <small class="d-block text-muted">
+                                        <%= favorite.property.listingType === 'rent' ? '/month' : '' %>
+                                    </small>
+                                </div>
+
+                                <% if (favorite.buyerPreferences?.interestLevel) { %>
+                                    <div class="interest-level <%= favorite.buyerPreferences.interestLevel %>">
+                                        <i class="fas fa-star me-1"></i>
+                                        <%= favorite.buyerPreferences.interestLevel.replace('_', ' ').toUpperCase() %>
+                                    </div>
+                                <% } %>
+
+                                <% if (favorite.buyerPreferences?.timeline) { %>
+                                    <div style="margin-bottom: 1rem; text-align: center;">
+                                        <small class="text-muted">
+                                            <i class="fas fa-clock me-1"></i>
+                                            Timeline: <%= favorite.buyerPreferences.timeline.replace('_', ' ').toUpperCase() %>
+                                        </small>
+                                    </div>
+                                <% } %>
+                                
+                                <div class="favorite-actions">
+                                    <a href="/listings/<%= favorite.property._id %>" class="btn-view">
+                                        <i class="fas fa-eye me-2"></i>View Details
+                                    </a>
+                                    <button class="btn-remove" onclick="removeFavorite('<%= favorite._id %>')" 
+                                            data-favorite-id="<%= favorite._id %>">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+
+                                <% if (favorite.notes && favorite.notes.trim()) { %>
+                                    <div class="favorite-notes">
+                                        <div class="notes-label">Your Notes:</div>
+                                        <div class="notes-content"><%= favorite.notes %></div>
+                                    </div>
+                                <% } %>
+
+                                <% if (favorite.buyerPreferences?.budget && (favorite.buyerPreferences.budget.min || favorite.buyerPreferences.budget.max)) { %>
+                                    <div style="margin-top: 1rem; padding: 0.75rem; background: #f0f8ff; border-radius: 8px;">
+                                        <small class="text-muted">
+                                            <i class="fas fa-rupee-sign me-1"></i>
+                                            Budget: 
+                                            <% if (favorite.buyerPreferences.budget.min) { %>
+                                                ₹<%= favorite.buyerPreferences.budget.min.toLocaleString() %>
+                                            <% } %>
+                                            <% if (favorite.buyerPreferences.budget.min && favorite.buyerPreferences.budget.max) { %> - <% } %>
+                                            <% if (favorite.buyerPreferences.budget.max) { %>
+                                                ₹<%= favorite.buyerPreferences.budget.max.toLocaleString() %>
+                                            <% } %>
+                                        </small>
+                                    </div>
+                                <% } %>
+                            </div>
+                        </div>
+                    <% }); %>
+                </div>
+
+                <!-- Pagination -->
+                <% if (totalPages > 1) { %>
+                    <div class="pagination">
+                        <% if (hasPrevPage) { %>
+                            <a href="?page=<%= currentPage - 1 %>" class="page-link">
+                                <i class="fas fa-chevron-left"></i> Previous
+                            </a>
+                        <% } %>
+                        
+                        <% for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) { %>
+                            <a href="?page=<%= i %>" class="page-link <%= i === currentPage ? 'active' : '' %>">
+                                <%= i %>
+                            </a>
+                        <% } %>
+                        
+                        <% if (hasNextPage) { %>
+                            <a href="?page=<%= currentPage + 1 %>" class="page-link">
+                                Next <i class="fas fa-chevron-right"></i>
+                            </a>
+                        <% } %>
+                    </div>
+                <% } %>
+
+            <% } else { %>
+                <div class="empty-state">
+                    <i class="fas fa-heart"></i>
+                    <h3>No Favorites Yet</h3>
+                    <p>Start exploring properties and add them to your favorites to see them here.</p>
+                    <a href="/listings" class="btn btn-primary btn-lg">
+                        <i class="fas fa-search me-2"></i>Browse Properties
+                    </a>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Remove favorite functionality
+    function removeFavorite(favoriteId) {
+        if (!confirm('Are you sure you want to remove this property from your favorites?')) {
+            return;
+        }
+
+        const btn = event.target.closest('.btn-remove');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+        fetch(`/favorites/${favoriteId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Remove the card from the DOM
+                btn.closest('.favorite-card').remove();
+                showToast('Property removed from favorites!', 'success');
+                
+                // Update statistics
+                updateStats();
+            } else {
+                throw new Error(data.message || 'Failed to remove favorite');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('Error removing favorite!', 'error');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-trash"></i>';
+        });
+    }
+
+    // Update statistics after removing a favorite
+    function updateStats() {
+        const remainingFavorites = document.querySelectorAll('.favorite-card').length;
+        const totalStat = document.querySelector('.stat-number');
+        if (totalStat) {
+            totalStat.textContent = remainingFavorites;
+        }
+        
+        // If no favorites left, show empty state
+        if (remainingFavorites === 0) {
+            location.reload();
+        }
+    }
+
+    // Show toast notification
+    function showToast(message, type) {
+        const toast = document.createElement('div');
+        toast.className = `alert alert-${type === 'error' ? 'danger' : type} position-fixed`;
+        toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        toast.innerHTML = message;
+        
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
+</script>
+
+

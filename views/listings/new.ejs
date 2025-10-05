@@ -1,40 +1,605 @@
 <% layout("/layouts/boilerplate") %>
-<div class="row mt-3">
-    <div class="col-8 offset-2">
-        <h3 class="mt-3 mb-2">Create a New Listing</h3>
-        <form action="/listings" method="POST" class="needs-validation" novalidate enctype="multipart/form-data">
-            <div class="mb-3">
-                <label for="title" class="form-label">Title</label>
-                <input name="listing[title]"type="text" class="form-control" placeholder="Add a catchy title" required>
-                <div class="valid-feedback">Title looks good!</div>
+
+<style>
+    .form-container {
+        background: white;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        margin: 2rem 0;
+    }
+
+    .form-section {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        color: #2c3e50;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #667eea;
+    }
+
+    .image-preview {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .image-preview img {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 2px solid #ddd;
+    }
+
+    .required-field::after {
+        content: " *";
+        color: #dc3545;
+    }
+    
+    .listing-form .form-control:invalid {
+        border-color: #dc3545;
+    }
+    
+    .listing-form .form-control:valid {
+        border-color: #28a745;
+    }
+    
+    .validation-error {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: none;
+    }
+    
+    .validation-error.show {
+        display: block;
+    }
+</style>
+
+<div class="container">
+    <div class="form-container">
+        <h2 class="text-center mb-4">Create New Property Listing</h2>
+        
+        <!-- Error Display -->
+        <% if (locals.error) { %>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>Error:</strong> <%= error %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
-            <div class="mb-3">
-                <label for="description" class="form-label">Description</label>
-                <textarea name="listing[description]" class="form-control" required></textarea>
-                <div class="invalid-feedback">Please enter a short description</div>
+        <% } %>
+        
+        <!-- Success Display -->
+        <% if (locals.success) { %>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <strong>Success:</strong> <%= success %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
-            <div class="mb-3">
-                <label for="image" class="form-label">Upload Listing Image</label>
-                <input name="listing[image]" type="file" class="form-control" required>
-            </div>
-            <div class="row">
-                <div class="mb-3 col-md-4">
-                    <label for="price" class="form-label">Price</label>
-                    <input name="listing[price]" placeholder="1200" class="form-control" required>
-                    <div class="invalid-feedback">Price should be valid</div>
+        <% } %>
+        
+
+        
+        <form action="/listings" method="POST" class="listing-form" enctype="multipart/form-data" id="listingForm">
+            
+            <!-- Basic Information -->
+            <div class="form-section">
+                <h4 class="section-title">Basic Information</h4>
+                <div class="row">
+                    <div class="col-md-8 mb-3">
+                        <label for="title" class="form-label required-field">Property Title</label>
+                        <input name="listing[title]" type="text" class="form-control" placeholder="e.g., Beautiful 3BHK Apartment in City Center" value="<%= locals.formData && formData.title ? formData.title : '' %>" required>
+                        <div class="invalid-feedback">Please provide a property title</div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="propertyType" class="form-label required-field">Property Type</label>
+                        <select name="listing[propertyType]" class="form-control" required>
+                            <option value="">Select Type</option>
+                            <option value="apartment" <%= locals.formData && formData.propertyType === 'apartment' ? 'selected' : '' %>>Apartment</option>
+                            <option value="house" <%= locals.formData && formData.propertyType === 'house' ? 'selected' : '' %>>House</option>
+                            <option value="villa" <%= locals.formData && formData.propertyType === 'villa' ? 'selected' : '' %>>Villa</option>
+                            <option value="commercial" <%= locals.formData && formData.propertyType === 'commercial' ? 'selected' : '' %>>Commercial</option>
+                            <option value="land" <%= locals.formData && formData.propertyType === 'land' ? 'selected' : '' %>>Land</option>
+                            <option value="office" <%= locals.formData && formData.propertyType === 'office' ? 'selected' : '' %>>Office</option>
+                            <option value="shop" <%= locals.formData && formData.propertyType === 'shop' ? 'selected' : '' %>>Shop</option>
+                        </select>
+                        <div class="invalid-feedback">Please select a property type</div>
+                    </div>
                 </div>
-                <div class="mb-3 col-md-8">
-                    <label for="country" class="form-label">Country</label>
-                    <input name="listing[country]" placeholder="India" type="text" class="form-control" required>
-                    <div class="invalid-feedback">Country name should be valid</div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="listingType" class="form-label required-field">Listing Type</label>
+                        <select name="listing[listingType]" class="form-control" required>
+                            <option value="">Select Type</option>
+                            <option value="sale" <%= locals.formData && formData.listingType === 'sale' ? 'selected' : '' %>>Sale</option>
+                            <option value="rent" <%= locals.formData && formData.listingType === 'rent' ? 'selected' : '' %>>Rent</option>
+                        </select>
+                        <div class="invalid-feedback">Please select a listing type</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select name="listing[status]" class="form-control">
+                            <option value="active" <%= locals.formData && formData.status === 'active' ? 'selected' : '' %>>Active</option>
+                            <option value="under_offer" <%= locals.formData && formData.status === 'under_offer' ? 'selected' : '' %>>Under Offer</option>
+                            <option value="sold" <%= locals.formData && formData.status === 'sold' ? 'selected' : '' %>>Sold</option>
+                            <option value="rented" <%= locals.formData && formData.status === 'rented' ? 'selected' : '' %>>Rented</option>
+                            <option value="inactive" <%= locals.formData && formData.status === 'inactive' ? 'selected' : '' %>>Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="description" class="form-label required-field">Description</label>
+                    <textarea name="listing[description]" class="form-control" rows="4" placeholder="Describe your property in detail..." required><%= locals.formData && formData.description ? formData.description : '' %></textarea>
+                    <div class="invalid-feedback">Please provide a property description</div>
                 </div>
             </div>
-            <div class="mb-3">
-                <label for="location" class="form-label">Location</label>
-                <input name="listing[location]" placeholder="Jaipur, Rajasthan" type="text" class="form-control" required>
-                <div class="invalid-feedback">Location should be valid</div>
+
+            <!-- Pricing -->
+            <div class="form-section">
+                <h4 class="section-title">Pricing Information</h4>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="price" class="form-label required-field">Price (₹)</label>
+                        <input name="listing[price][amount]" type="number" class="form-control" placeholder="e.g., 5000000" min="0" value="<%= locals.formData && formData.price && formData.price.amount ? formData.price.amount : '' %>" required>
+                        <div class="invalid-feedback">Please provide a valid price</div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="currency" class="form-label">Currency</label>
+                        <select name="listing[price][currency]" class="form-control">
+                            <option value="INR" <%= locals.formData && formData.price && formData.price.currency === 'INR' ? 'selected' : '' %>>INR</option>
+                            <option value="USD" <%= locals.formData && formData.price && formData.price.currency === 'USD' ? 'selected' : '' %>>USD</option>
+                            <option value="EUR" <%= locals.formData && formData.price && formData.price.currency === 'EUR' ? 'selected' : '' %>>EUR</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="negotiable" class="form-label">Negotiable</label>
+                        <select name="listing[price][negotiable]" class="form-control">
+                            <option value="false" <%= locals.formData && formData.price && formData.price.negotiable === 'false' ? 'selected' : '' %>>No</option>
+                            <option value="true" <%= locals.formData && formData.price && formData.price.negotiable === 'true' ? 'selected' : '' %>>Yes</option>
+                        </select>
+                    </div>
+                </div>
             </div>
-            <button class="btn btn-dark my-3 add-btn">Add</button>
+
+            <!-- Property Details -->
+            <div class="form-section">
+                <h4 class="section-title">Property Details</h4>
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label for="bedrooms" class="form-label">Bedrooms</label>
+                        <input name="listing[bedrooms]" type="number" class="form-control" placeholder="3" min="0" value="<%= locals.formData && formData.bedrooms ? formData.bedrooms : '' %>">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="bathrooms" class="form-label">Bathrooms</label>
+                        <input name="listing[bathrooms]" type="number" class="form-control" placeholder="2" min="0" value="<%= locals.formData && formData.bathrooms ? formData.bathrooms : '' %>">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="floor" class="form-label">Floor</label>
+                        <input name="listing[floor]" type="number" class="form-control" placeholder="2" min="0" value="<%= locals.formData && formData.floor ? formData.floor : '' %>">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="totalFloors" class="form-label">Total Floors</label>
+                        <input name="listing[totalFloors]" type="number" class="form-control" placeholder="10" min="0" value="<%= locals.formData && formData.totalFloors ? formData.totalFloors : '' %>">
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="areaSize" class="form-label">Area Size</label>
+                        <input name="listing[area][size]" type="number" class="form-control" placeholder="1500" min="0" value="<%= locals.formData && formData.area && formData.area.size ? formData.area.size : '' %>">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="areaUnit" class="form-label">Area Unit</label>
+                        <select name="listing[area][unit]" class="form-control">
+                            <option value="sqft" <%= locals.formData && formData.area && formData.area.unit === 'sqft' ? 'selected' : '' %>>Square Feet</option>
+                            <option value="sqm" <%= locals.formData && formData.area && formData.area.unit === 'sqm' ? 'selected' : '' %>>Square Meters</option>
+                            <option value="acres" <%= locals.formData && formData.area && formData.area.unit === 'acres' ? 'selected' : '' %>>Acres</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="yearBuilt" class="form-label">Year Built</label>
+                        <input name="listing[yearBuilt]" type="number" class="form-control" placeholder="2020" min="1900" max="2030" value="<%= locals.formData && formData.yearBuilt ? formData.yearBuilt : '' %>">
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="furnishing" class="form-label">Furnishing</label>
+                        <select name="listing[furnishing]" class="form-control">
+                            <option value="unfurnished" <%= locals.formData && formData.furnishing === 'unfurnished' ? 'selected' : '' %>>Unfurnished</option>
+                            <option value="semi-furnished" <%= locals.formData && formData.furnishing === 'semi-furnished' ? 'selected' : '' %>>Semi-Furnished</option>
+                            <option value="fully-furnished" <%= locals.formData && formData.furnishing === 'fully-furnished' ? 'selected' : '' %>>Fully-Furnished</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="featured" class="form-label">Featured Property</label>
+                        <select name="listing[featured]" class="form-control">
+                            <option value="false" <%= locals.formData && formData.featured === 'false' ? 'selected' : '' %>>No</option>
+                            <option value="true" <%= locals.formData && formData.featured === 'true' ? 'selected' : '' %>>Yes</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Location -->
+            <div class="form-section">
+                <h4 class="section-title">Location Details</h4>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="street" class="form-label">Street Address</label>
+                        <input name="listing[address][street]" type="text" class="form-control" placeholder="123 Main Street" value="<%= locals.formData && formData.address && formData.address.street ? formData.address.street : '' %>">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="city" class="form-label required-field">City</label>
+                        <input name="listing[address][city]" type="text" class="form-control" placeholder="Mumbai" value="<%= locals.formData && formData.address && formData.address.city ? formData.address.city : '' %>" required>
+                        <div class="invalid-feedback">Please provide a city</div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="state" class="form-label required-field">State</label>
+                        <input name="listing[address][state]" type="text" class="form-control" placeholder="Maharashtra" value="<%= locals.formData && formData.address && formData.address.state ? formData.address.state : '' %>" required>
+                        <div class="invalid-feedback">Please provide a state</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="pincode" class="form-label">Pincode</label>
+                        <input name="listing[address][pincode]" type="text" class="form-control" placeholder="400001" value="<%= locals.formData && formData.address && formData.address.pincode ? formData.address.pincode : '' %>">
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="country" class="form-label">Country</label>
+                        <input name="listing[address][country]" type="text" class="form-control" value="<%= locals.formData && formData.address && formData.address.country ? formData.address.country : 'India' %>" readonly>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="coordinates" class="form-label">Property Location</label>
+                        <button type="button" class="btn btn-outline-primary w-100" id="selectLocationBtn">
+                            <i class="fas fa-map-marker-alt me-2"></i>Select Location on Map
+                        </button>
+                        <input name="listing[location][coordinates]" type="hidden" id="locationCoordinates" value="<%= locals.formData && formData.location && formData.location.coordinates ? formData.location.coordinates : '' %>">
+                        <small class="form-text text-muted">Click to select property location and get location scores</small>
+                    </div>
+                </div>
+                
+                <!-- Location Scores Display -->
+                <div id="locationScoresContainer" class="mt-3" style="display: none;">
+                    <h5 class="text-primary mb-3">📍 Location Scores</h5>
+                    <div class="row" id="scoresDisplay">
+                        <!-- Scores will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Images -->
+            <div class="form-section">
+                <h4 class="section-title">Property Images</h4>
+                <div class="mb-3">
+                    <label for="images" class="form-label">Upload Images</label>
+                    <input name="listing[images]" type="file" class="form-control" multiple accept="image/*">
+                    <div class="form-text">You can select multiple images. First image will be the main image. (Optional - will use placeholder if none uploaded)</div>
+                </div>
+                <div class="image-preview" id="imagePreview"></div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary btn-lg px-5">Create Listing</button>
+                <a href="/listings" class="btn btn-secondary btn-lg px-5 ms-3">Cancel</a>
+            </div>
         </form>
     </div>
 </div>
+
+<!-- Location Selection Modal -->
+<div class="modal fade" id="locationModal" tabindex="-1" aria-labelledby="locationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="locationModalLabel">Select Property Location</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="locationMap" style="height: 400px; width: 100%;"></div>
+                <div class="mt-3">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Click on the map to select your property location. The system will automatically calculate location scores based on nearby amenities, environment, safety, and pollution data.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmLocationBtn" disabled>Confirm Location</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Modal -->
+<div class="modal fade" id="loadingModal" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="mt-3">
+                    <h6>Calculating Location Scores...</h6>
+                    <small class="text-muted">This may take a few seconds</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Leaflet CSS and JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+    // Image preview functionality
+    document.querySelector('input[name="listing[images]"]').addEventListener('change', function(e) {
+        const preview = document.getElementById('imagePreview');
+        preview.innerHTML = '';
+        
+        if (this.files && this.files.length > 0) {
+            for (let i = 0; i < this.files.length; i++) {
+                const file = this.files[i];
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.alt = 'Preview ' + (i + 1);
+                        preview.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+        }
+    });
+    
+    // Form validation
+    document.getElementById('listingForm').addEventListener('submit', function(e) {
+        // Check required fields
+        const requiredFields = [
+            'listing[title]',
+            'listing[description]',
+            'listing[propertyType]',
+            'listing[listingType]',
+            'listing[price][amount]',
+            'listing[address][city]',
+            'listing[address][state]'
+        ];
+        
+        const missingFields = [];
+        
+        requiredFields.forEach(fieldName => {
+            const field = document.querySelector(`[name="${fieldName}"]`);
+            if (!field || !field.value.trim()) {
+                missingFields.push(fieldName.replace('listing[', '').replace(']', ''));
+                field.classList.add('is-invalid');
+            } else {
+                field.classList.remove('is-invalid');
+            }
+        });
+        
+        if (missingFields.length > 0) {
+            e.preventDefault();
+            alert('Please fill in all required fields: ' + missingFields.join(', '));
+            return false;
+        }
+        
+        // Show loading state
+        const submitBtn = this.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.textContent = 'Creating Listing...';
+            submitBtn.disabled = true;
+        }
+        
+        return true; // Allow form to submit
+    });
+
+    // Map functionality
+    let map = null;
+    let selectedMarker = null;
+    let selectedLocation = null;
+    let locationModal = null;
+    let loadingModal = null;
+
+    // Initialize modals when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        locationModal = new bootstrap.Modal(document.getElementById('locationModal'));
+        loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+    });
+
+    // Location selection button click handler
+    document.getElementById('selectLocationBtn').addEventListener('click', function() {
+        locationModal.show();
+        
+        // Initialize map after modal is shown
+        setTimeout(function() {
+            initializeMap();
+        }, 300);
+    });
+
+    // Initialize Leaflet map
+    function initializeMap() {
+        if (map) {
+            map.remove();
+        }
+
+        // Default center (Pune, India)
+        const defaultCenter = [18.5204, 73.8567];
+        
+        map = L.map('locationMap').setView(defaultCenter, 13);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Add click handler to map
+        map.on('click', function(e) {
+            selectLocation(e.latlng);
+        });
+
+        // Add marker for current selection if exists
+        const currentCoords = document.getElementById('locationCoordinates').value;
+        if (currentCoords) {
+            const coords = currentCoords.split(',').map(c => parseFloat(c.trim()));
+            if (coords.length === 2) {
+                const latlng = L.latLng(coords[1], coords[0]); // Convert lon,lat to lat,lng
+                selectLocation(latlng);
+            }
+        }
+    }
+
+    // Select location on map
+    function selectLocation(latlng) {
+        // Remove existing marker
+        if (selectedMarker) {
+            map.removeLayer(selectedMarker);
+        }
+
+        // Add new marker
+        selectedMarker = L.marker(latlng).addTo(map)
+            .bindPopup('Selected Property Location')
+            .openPopup();
+
+        selectedLocation = latlng;
+        document.getElementById('confirmLocationBtn').disabled = false;
+    }
+
+    // Confirm location button handler
+    document.getElementById('confirmLocationBtn').addEventListener('click', function() {
+        if (selectedLocation) {
+            calculateLocationScores(selectedLocation.lat, selectedLocation.lng);
+        }
+    });
+
+    // Calculate location scores
+    async function calculateLocationScores(lat, lng) {
+        try {
+            // Show loading modal
+            locationModal.hide();
+            loadingModal.show();
+
+            // Make API call to calculate scores
+            const response = await fetch('/listings/api/calculate-scores', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    latitude: lat,
+                    longitude: lng
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                // Update coordinates input
+                document.getElementById('locationCoordinates').value = `${lng},${lat}`;
+                
+                // Update button text
+                document.getElementById('selectLocationBtn').innerHTML = 
+                    `<i class="fas fa-map-marker-alt me-2"></i>Location Selected (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+                
+                // Display scores
+                displayLocationScores(result.scores);
+                
+                // Hide loading modal
+                loadingModal.hide();
+                
+                // Show success message
+                showAlert('Location selected and scores calculated successfully!', 'success');
+            } else {
+                throw new Error(result.message || 'Failed to calculate scores');
+            }
+
+        } catch (error) {
+            console.error('Error calculating scores:', error);
+            loadingModal.hide();
+            showAlert('Error calculating location scores: ' + error.message, 'danger');
+        }
+    }
+
+    // Display location scores
+    function displayLocationScores(scores) {
+        const container = document.getElementById('locationScoresContainer');
+        const display = document.getElementById('scoresDisplay');
+        
+        display.innerHTML = `
+            <div class="col-md-3 mb-3">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <h5 class="card-title text-success">🏥 Amenities</h5>
+                        <h3 class="text-success">${scores.amenityScore}/100</h3>
+                        <small class="text-muted">Nearby facilities</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <h5 class="card-title text-info">🌳 Environment</h5>
+                        <h3 class="text-info">${scores.environmentScore}/100</h3>
+                        <small class="text-muted">Green spaces & air quality</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <h5 class="card-title text-warning">🛡️ Safety</h5>
+                        <h3 class="text-warning">${scores.safetyScore}/100</h3>
+                        <small class="text-muted">Security & police presence</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">🏆 Overall</h5>
+                        <h3 class="text-primary">${scores.overallScore}/100</h3>
+                        <small class="text-muted">Combined location score</small>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        container.style.display = 'block';
+    }
+
+    // Show alert message
+    function showAlert(message, type) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        // Insert after the form container
+        const formContainer = document.querySelector('.form-container');
+        formContainer.parentNode.insertBefore(alertDiv, formContainer.nextSibling);
+        
+        // Auto-dismiss after 5 seconds
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.parentNode.removeChild(alertDiv);
+            }
+        }, 5000);
+    }
+</script>

@@ -1,6 +1,13 @@
-if(process.env.NODE_ENV != "production") {
-    require('dotenv').config();
-}
+require('dotenv').config();
+
+// Temporary hardcoded values for testing
+process.env.ATLASDB_URL = 'mongodb://localhost:27017/wanderlust';
+process.env.CLOUD_NAME = 'dni5pw0wh';
+process.env.CLOUD_API_KEY = '633357282274388';
+process.env.CLOUD_API_SECRET = 'nyCOX-AyujWi_hit_KwQNV2Pxkg';
+process.env.RAZORPAY_KEY_ID = 'rzp_test_R9rInMcdCNinzv';
+process.env.RAZORPAY_KEY_SECRET = 'DNQO5D9ZIHjKfmlGNqGyEl0j';
+process.env.SECRET = 'wanderlust_secret_key_2024';
 
 const express = require("express");
 const app = express();
@@ -19,13 +26,29 @@ const User = require("./models/user.js");
 const listingRouter = require("./routes/listing.js");
 const reviewRouter = require("./routes/review.js");
 const userRouter = require("./routes/user.js");
+const leadRouter = require("./routes/lead.js");
+const taskRouter = require("./routes/task.js");
+const favoriteRouter = require("./routes/favorite.js");
+const recommendationRouter = require("./routes/recommendations.js");
+const buyerManagementRouter = require("./routes/buyerManagement.js");
+const buyerDashboardRouter = require("./routes/buyerDashboard.js");
+const communicationRouter = require("./routes/communication.js");
+const paymentRouter = require("./routes/payment.js");
+
 
 const dbUrl = process.env.ATLASDB_URL;
 
+// Debug environment variables
+console.log('🔍 Environment Variables Debug:');
+console.log('ATLASDB_URL:', process.env.ATLASDB_URL);
+console.log('CLOUD_NAME:', process.env.CLOUD_NAME);
+console.log('RAZORPAY_KEY_ID:', process.env.RAZORPAY_KEY_ID ? 'Set' : 'Not Set');
+console.log('SECRET:', process.env.SECRET ? 'Set' : 'Not Set');
+
 main().then(() => {
-    console.log("connected to DB");
+    console.log("✅ Connected to DB successfully");
 }).catch((err) => {
-    console.log(err);
+    console.log("❌ DB Connection Error:", err);
 });
 
 async function main() {
@@ -34,11 +57,27 @@ async function main() {
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
-app.use(express.urlencoded({extended: true}));
-app.use(methodOverride("_method"));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json()); // Add JSON parsing middleware
+// Support method-override from query string, form body, or header
+app.use(methodOverride((req, res) => {
+    // 1) Check query string ?_method=DELETE
+    if (req.query && req.query._method) return req.query._method;
+    // 2) Check body (for forms with hidden input named _method)
+    if (req.body && typeof req.body === 'object' && req.body._method) {
+        const method = req.body._method;
+        // Remove it so it doesn't pollute req.body for downstream handlers
+        delete req.body._method;
+        return method;
+    }
+    // 3) Check common header used by some clients
+    if (req.headers['x-http-method-override']) return req.headers['x-http-method-override'];
+    return undefined;
+}));
 app.engine('ejs', ejsMate);
 app.use(express.static(path.join(__dirname, "/public")));
 
+console.log('🔍 Creating MongoStore with URL:', dbUrl);
 const store = MongoStore.create({
     mongoUrl: dbUrl,
     crypto: {
@@ -47,7 +86,7 @@ const store = MongoStore.create({
     touchAfter: 24 * 3600,
 });
 
-store.on("error", () => {
+store.on("error", (err) => {
     console.log("ERROR IN MONGO SESSION STORE", err);
 })
 
@@ -63,17 +102,13 @@ const sessionOptions = {
     }
 };
 
-app.get("/", (req, res) => {
-    res.redirect("/listings");
-});
-
+// ✅ MOVE THIS SECTION ABOVE ALL ROUTES
 app.use(session(sessionOptions));
 app.use(flash());
 
 app.use(passport.initialize());
 app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
-
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
@@ -84,28 +119,40 @@ app.use((req, res, next) => {
     next();
 });
 
+// ✅ ROUTES GO BELOW SESSION/PASSPORT
+app.get("/", (req, res) => {
+    res.redirect("/listings");
+});
+
 // app.get("/demouser", async (req, res) => {
 //     let fakeUser = new User({
 //         email: "student@gmail.com",
 //         username: "delta-student",
 //     });
-
 //     let registeredUser = await User.register(fakeUser, "helloworld");
 //     res.send(registeredUser);
-// })
+// });
 
 app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
+app.use("/leads", leadRouter);
+app.use("/tasks", taskRouter);
+app.use("/favorites", favoriteRouter);
+app.use("/recommendations", recommendationRouter);
+app.use("/buyer-management", buyerManagementRouter);
+app.use("/buyers", buyerDashboardRouter);
+app.use("/communication", communicationRouter);
+app.use("/payment", paymentRouter);
+
 app.use("/", userRouter);
 
 app.all("*", (req, res, next) => {
     next(new ExpressError(404, "Page Not Found!"));
-})
+});
 
 app.use((err, req, res, next) => {
-    let { statusCode=500, message="Something went wrong!" } = err;
+    let { statusCode = 500, message = "Something went wrong!" } = err;
     res.status(statusCode).render("error.ejs", { err });
-    // res.status(statusCode).send(message);
 });
 
 app.listen(8080, () => {

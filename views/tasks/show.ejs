@@ -1,0 +1,382 @@
+<% layout('/layouts/boilerplate') %>
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Task Header -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h1 class="h2 mb-1"><%= task.title %></h1>
+                            <p class="text-muted mb-0">Task ID: <%= task._id %></p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="/tasks/<%= task._id %>/edit" class="btn btn-outline-primary">
+                                <i class="fas fa-edit me-2"></i>Edit Task
+                            </a>
+                            <% if (task.status !== 'completed') { %>
+                                <button class="btn btn-success" onclick="markAsComplete('<%= task._id %>')">
+                                    <i class="fas fa-check me-2"></i>Mark Complete
+                                </button>
+                            <% } %>
+                            <a href="/tasks" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Tasks
+                            </a>
+                        </div>
+                    </div>
+                    <!-- Status and Priority Badges -->
+                    <div class="d-flex gap-2 mb-3">
+                        <% 
+                            const statusColors = {
+                                'pending': 'bg-secondary',
+                                'in_progress': 'bg-warning',
+                                'completed': 'bg-success',
+                                'cancelled': 'bg-danger'
+                            };
+                            const statusLabels = {
+                                'pending': 'Pending',
+                                'in_progress': 'In Progress',
+                                'completed': 'Completed',
+                                'cancelled': 'Cancelled'
+                            };
+                        %>
+                        <span class="badge <%= statusColors[task.status] || 'bg-secondary' %> fs-6">
+                            <%= statusLabels[task.status] || task.status %>
+                        </span>
+                        <% 
+                            const priorityColors = {
+                                'high': 'bg-danger',
+                                'medium': 'bg-warning',
+                                'low': 'bg-success'
+                            };
+                        %>
+                        <span class="badge <%= priorityColors[task.priority] || 'bg-secondary' %> fs-6">
+                            <%= task.priority.charAt(0).toUpperCase() + task.priority.slice(1) %> Priority
+                        </span>
+                        <span class="badge bg-info fs-6">
+                            <%= task.type.charAt(0).toUpperCase() + task.type.slice(1) %>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Task Details -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Task Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3">Basic Information</h6>
+                            <div class="mb-3">
+                                <strong>Description:</strong>
+                                <p class="mt-2"><%= task.description || 'No description provided' %></p>
+                            </div>
+                            <div class="mb-3">
+                                <strong>Type:</strong>
+                                <span class="badge bg-light text-dark ms-2"><%= task.type %></span>
+                            </div>
+                            <div class="mb-3">
+                                <strong>Due Date:</strong>
+                                <span class="ms-2 <%= new Date(task.dueDate) < new Date() && task.status !== 'completed' ? 'text-danger' : '' %>">
+                                    <%= new Date(task.dueDate).toLocaleDateString() %>
+                                    <% if (new Date(task.dueDate) < new Date() && task.status !== 'completed') { %>
+                                        <i class="fas fa-exclamation-triangle text-warning ms-1" title="Overdue"></i>
+                                    <% } %>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3">Assignment & Timeline</h6>
+                            <div class="mb-3">
+                                <strong>Assigned To:</strong>
+                                <span class="ms-2"><%= task.assignedTo ? task.assignedTo.firstName + ' ' + task.assignedTo.lastName : 'Unassigned' %></span>
+                            </div>
+                            <div class="mb-3">
+                                <strong>Created:</strong>
+                                <span class="ms-2"><%= new Date(task.createdAt).toLocaleDateString() %></span>
+                            </div>
+                            <% if (task.updatedAt && task.updatedAt !== task.createdAt) { %>
+                                <div class="mb-3">
+                                    <strong>Last Updated:</strong>
+                                    <span class="ms-2"><%= new Date(task.updatedAt).toLocaleDateString() %></span>
+                                </div>
+                            <% } %>
+                            <% if (task.completedAt) { %>
+                                <div class="mb-3">
+                                    <strong>Completed:</strong>
+                                    <span class="ms-2 text-success"><%= new Date(task.completedAt).toLocaleDateString() %></span>
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Related Lead -->
+            <% if (task.lead) { %>
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-user me-2"></i>Related Lead</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <i class="fas fa-user fa-2x text-primary"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">
+                                    <a href="/leads/<%= task.lead._id %>" class="text-decoration-none">
+                                        <%= task.lead.firstName %> <%= task.lead.lastName %>
+                                    </a>
+                                </h6>
+                                <p class="text-muted mb-0"><%= task.lead.email %></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <% } %>
+
+            <!-- Related Property -->
+            <% if (task.property) { %>
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-home me-2"></i>Related Property</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <i class="fas fa-building fa-2x text-primary"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">
+                                    <a href="/listings/<%= task.property._id %>" class="text-decoration-none">
+                                        <%= task.property.title %>
+                                    </a>
+                                </h6>
+                                <p class="text-muted mb-0"><%= task.property.address %></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <% } %>
+
+            <!-- Notes Section -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-sticky-note me-2"></i>Task Notes</h5>
+                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addNoteModal">
+                        <i class="fas fa-plus me-2"></i>Add Note
+                    </button>
+                </div>
+                <div class="card-body">
+                    <% if (task.notes && task.notes.length > 0) { %>
+                        <% task.notes.forEach(note => { %>
+                            <div class="border-bottom pb-3 mb-3">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <strong><%= note.content %></strong>
+                                    <small class="text-muted"><%= new Date(note.createdAt).toLocaleString() %></small>
+                                </div>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <p class="text-muted text-center py-3">No notes added yet. Add your first note to track progress on this task.</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Quick Actions -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <% if (task.status === 'pending') { %>
+                            <button class="btn btn-outline-warning" onclick="startTask('<%= task._id %>')">
+                                <i class="fas fa-play me-2"></i>Start Task
+                            </button>
+                        <% } %>
+                        <% if (task.status === 'in_progress') { %>
+                            <button class="btn btn-outline-success" onclick="pauseTask('<%= task._id %>')">
+                                <i class="fas fa-pause me-2"></i>Pause Task
+                            </button>
+                        <% } %>
+                        <button class="btn btn-outline-info" onclick="addTimeLog('<%= task._id %>')">
+                            <i class="fas fa-clock me-2"></i>Add Time Log
+                        </button>
+                        <button class="btn btn-outline-primary" onclick="updateStatus('<%= task._id %>')">
+                            <i class="fas fa-edit me-2"></i>Update Status
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Task Timeline -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-clock me-2"></i>Timeline</h6>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-success"></div>
+                            <div class="timeline-content">
+                                <h6 class="mb-1">Task Created</h6>
+                                <small class="text-muted"><%= new Date(task.createdAt).toLocaleDateString() %></small>
+                            </div>
+                        </div>
+                        <% if (task.status === 'in_progress') { %>
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-warning"></div>
+                                <div class="timeline-content">
+                                    <h6 class="mb-1">Task Started</h6>
+                                    <small class="text-muted"><%= new Date(task.updatedAt).toLocaleDateString() %></small>
+                                </div>
+                            </div>
+                        <% } %>
+                        <% if (task.status === 'completed') { %>
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-success"></div>
+                                <div class="timeline-content">
+                                    <h6 class="mb-1">Task Completed</h6>
+                                    <small class="text-muted"><%= new Date(task.completedAt).toLocaleDateString() %></small>
+                                </div>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Time Tracking -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-stopwatch me-2"></i>Time Tracking</h6>
+                </div>
+                <div class="card-body">
+                    <% if (task.timeLogs && task.timeLogs.length > 0) { %>
+                        <% task.timeLogs.slice(0, 3).forEach(log => { %>
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="me-2">
+                                    <i class="fas fa-clock text-primary"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold"><%= log.duration %> hours</div>
+                                    <small class="text-muted"><%= log.description || 'No description' %></small>
+                                </div>
+                            </div>
+                        <% }); %>
+                        <% if (task.timeLogs.length > 3) { %>
+                            <div class="text-center mt-2">
+                                <button class="btn btn-sm btn-outline-primary" onclick="viewAllTimeLogs('<%= task._id %>')">
+                                    View All Logs (<%= task.timeLogs.length %>)
+                                </button>
+                            </div>
+                        <% } %>
+                    <% } else { %>
+                        <p class="text-muted text-center py-2">No time logs yet.</p>
+                        <div class="text-center">
+                            <button class="btn btn-sm btn-primary" onclick="addTimeLog('<%= task._id %>')">
+                                <i class="fas fa-plus me-2"></i>Add Time Log
+                            </button>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Note Modal -->
+<div class="modal fade" id="addNoteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Task Note</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="/tasks/<%= task._id %>/notes" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="noteContent" class="form-label">Note Content</label>
+                        <textarea class="form-control" id="noteContent" name="content" rows="4" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Note</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline {
+    position: relative;
+    padding-left: 20px;
+}
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+.timeline-marker {
+    position: absolute;
+    left: -30px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 3px #dee2e6;
+}
+.timeline-content {
+    padding-left: 10px;
+}
+.timeline-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: -24px;
+    top: 12px;
+    width: 2px;
+    height: calc(100% + 8px);
+    background-color: #dee2e6;
+}
+</style>
+
+<script>
+function markAsComplete(taskId) {
+    if (confirm('Mark this task as complete?')) {
+        // Placeholder for marking task as complete
+        alert('Task completion functionality will be implemented here');
+    }
+}
+
+function startTask(taskId) {
+    // Placeholder for starting task
+    alert('Start task functionality will be implemented here');
+}
+
+function pauseTask(taskId) {
+    // Placeholder for pausing task
+    alert('Pause task functionality will be implemented here');
+}
+
+function addTimeLog(taskId) {
+    // Placeholder for adding time log
+    alert('Add time log functionality will be implemented here');
+}
+
+function updateStatus(taskId) {
+    // Placeholder for status update
+    alert('Status update functionality will be implemented here');
+}
+
+function viewAllTimeLogs(taskId) {
+    // Placeholder for viewing all time logs
+    alert('View all time logs functionality will be implemented here');
+}
+</script>

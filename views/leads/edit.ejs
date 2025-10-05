@@ -1,0 +1,229 @@
+<% layout('/layouts/boilerplate') %>
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h2 mb-1">Edit Lead</h1>
+                    <p class="text-muted mb-0">Update lead information for <%= lead.firstName %> <%= lead.lastName %></p>
+                </div>
+                <div>
+                    <a href="/leads/<%= lead._id %>" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Lead
+                    </a>
+                </div>
+            </div>
+            <div class="card shadow border-0">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-edit me-2"></i>Edit Lead Information</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form action="/leads/<%= lead._id %>?_method=PUT" method="POST" class="needs-validation" novalidate>
+                        <!-- Personal Information -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-3">
+                                    <i class="fas fa-user me-2"></i>Personal Information
+                                </h6>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="firstName" class="form-label">First Name *</label>
+                                    <input type="text" class="form-control" id="firstName" name="firstName" value="<%= lead.firstName %>" required>
+                                    <div class="invalid-feedback">Please provide a first name.</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="lastName" class="form-label">Last Name *</label>
+                                    <input type="text" class="form-control" id="lastName" name="lastName" value="<%= lead.lastName %>" required>
+                                    <div class="invalid-feedback">Please provide a last name.</div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Contact Information -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-3">
+                                    <i class="fas fa-address-book me-2"></i>Contact Information
+                                </h6>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email *</label>
+                                    <input type="email" class="form-control" id="email" name="email" value="<%= lead.email %>" required>
+                                    <div class="invalid-feedback">Please provide a valid email address.</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="phone" class="form-label">Phone Number *</label>
+                                    <input type="tel" class="form-control" id="phone" name="phone" value="<%= lead.phone %>" required>
+                                    <div class="invalid-feedback">Please provide a phone number.</div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Property Interest -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-3">
+                                    <i class="fas fa-home me-2"></i>Property Interest
+                                </h6>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="interest" class="form-label">Interest Type *</label>
+                                    <select class="form-select" id="interest" name="interest" required>
+                                        <option value="">Select interest type</option>
+                                        <option value="buy" <%= lead.interest === 'buy' ? 'selected' : '' %>>Buy</option>
+                                        <option value="rent" <%= lead.interest === 'rent' ? 'selected' : '' %>>Rent</option>
+                                        <option value="sell" <%= lead.interest === 'sell' ? 'selected' : '' %>>Sell</option>
+                                    </select>
+                                    <div class="invalid-feedback">Please select an interest type.</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="propertyType" class="form-label">Property Type</label>
+                                    <select class="form-select" id="propertyType" name="propertyType">
+                                        <option value="">Select property type</option>
+                                        <option value="apartment" <%= lead.propertyType === 'apartment' ? 'selected' : '' %>>Apartment</option>
+                                        <option value="house" <%= lead.propertyType === 'house' ? 'selected' : '' %>>House</option>
+                                        <option value="condo" <%= lead.propertyType === 'condo' ? 'selected' : '' %>>Condo</option>
+                                        <option value="townhouse" <%= lead.propertyType === 'townhouse' ? 'selected' : '' %>>Townhouse</option>
+                                        <option value="commercial" <%= lead.propertyType === 'commercial' ? 'selected' : '' %>>Commercial</option>
+                                        <option value="land" <%= lead.propertyType === 'land' ? 'selected' : '' %>>Land</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Budget and Timeline -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-3">
+                                    <i class="fas fa-dollar-sign me-2"></i>Budget & Timeline
+                                </h6>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="budget" class="form-label">Budget Range</label>
+                                    <select class="form-select" id="budget" name="budget">
+                                        <option value="">Select budget range</option>
+                                        <option value="under_100k" <%= lead.budget === 'under_100k' ? 'selected' : '' %>>Under $100,000</option>
+                                        <option value="100k_200k" <%= lead.budget === '100k_200k' ? 'selected' : '' %>>$100,000 - $200,000</option>
+                                        <option value="200k_300k" <%= lead.budget === '200k_300k' ? 'selected' : '' %>>$200,000 - $300,000</option>
+                                        <option value="300k_500k" <%= lead.budget === '300k_500k' ? 'selected' : '' %>>$300,000 - $500,000</option>
+                                        <option value="500k_750k" <%= lead.budget === '500k_750k' ? 'selected' : '' %>>$500,000 - $750,000</option>
+                                        <option value="750k_1m" <%= lead.budget === '750k_1m' ? 'selected' : '' %>>$750,000 - $1,000,000</option>
+                                        <option value="over_1m" <%= lead.budget === 'over_1m' ? 'selected' : '' %>>Over $1,000,000</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="timeline" class="form-label">Timeline</label>
+                                    <select class="form-select" id="timeline" name="timeline">
+                                        <option value="">Select timeline</option>
+                                        <option value="immediate" <%= lead.timeline === 'immediate' ? 'selected' : '' %>>Immediate (0-1 month)</option>
+                                        <option value="soon" <%= lead.timeline === 'soon' ? 'selected' : '' %>>Soon (1-3 months)</option>
+                                        <option value="flexible" <%= lead.timeline === 'flexible' ? 'selected' : '' %>>Flexible (3-6 months)</option>
+                                        <option value="planning" <%= lead.timeline === 'planning' ? 'selected' : '' %>>Planning (6+ months)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Location Preferences -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-3">
+                                    <i class="fas fa-map-marker-alt me-2"></i>Location Preferences
+                                </h6>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="preferredLocation" class="form-label">Preferred Location</label>
+                                    <input type="text" class="form-control" id="preferredLocation" name="preferredLocation" value="<%= lead.preferredLocation || '' %>" placeholder="e.g., Downtown, Suburbs, Specific neighborhood">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="source" class="form-label">Lead Source</label>
+                                    <select class="form-select" id="source" name="source">
+                                        <option value="">Select source</option>
+                                        <option value="website" <%= lead.source === 'website' ? 'selected' : '' %>>Website</option>
+                                        <option value="referral" <%= lead.source === 'referral' ? 'selected' : '' %>>Referral</option>
+                                        <option value="social_media" <%= lead.source === 'social_media' ? 'selected' : '' %>>Social Media</option>
+                                        <option value="open_house" <%= lead.source === 'open_house' ? 'selected' : '' %>>Open House</option>
+                                        <option value="cold_call" <%= lead.source === 'cold_call' ? 'selected' : '' %>>Cold Call</option>
+                                        <option value="other" <%= lead.source === 'other' ? 'selected' : '' %>>Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Lead Management -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-3">
+                                    <i class="fas fa-cog me-2"></i>Lead Management
+                                </h6>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="priority" class="form-label">Priority *</label>
+                                    <select class="form-select" id="priority" name="priority" required>
+                                        <option value="">Select priority</option>
+                                        <option value="low" <%= lead.priority === 'low' ? 'selected' : '' %>>Low</option>
+                                        <option value="medium" <%= lead.priority === 'medium' ? 'selected' : '' %>>Medium</option>
+                                        <option value="high" <%= lead.priority === 'high' ? 'selected' : '' %>>High</option>
+                                    </select>
+                                    <div class="invalid-feedback">Please select a priority level.</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="status" class="form-label">Status *</label>
+                                    <select class="form-select" id="status" name="status" required>
+                                        <option value="new" <%= lead.status === 'new' ? 'selected' : '' %>>New</option>
+                                        <option value="contacted" <%= lead.status === 'contacted' ? 'selected' : '' %>>Contacted</option>
+                                        <option value="qualified" <%= lead.status === 'qualified' ? 'selected' : '' %>>Qualified</option>
+                                        <option value="proposal_sent" <%= lead.status === 'proposal_sent' ? 'selected' : '' %>>Proposal Sent</option>
+                                        <option value="negotiation" <%= lead.status === 'negotiation' ? 'selected' : '' %>>Negotiation</option>
+                                        <option value="closed" <%= lead.status === 'closed' ? 'selected' : '' %>>Closed</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Submit Buttons -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="button" class="btn btn-outline-secondary me-md-2" onclick="history.back()">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Update Lead
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Form validation
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+</script>

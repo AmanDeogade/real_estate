@@ -1,0 +1,303 @@
+<% layout('/layouts/boilerplate') %>
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h2 mb-1">Lead Dashboard</h1>
+                    <p class="text-muted mb-0">Manage your leads and track performance</p>
+                </div>
+                <div>
+                    <a href="/leads/new" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Add New Lead
+                    </a>
+                    <a href="/leads" class="btn btn-outline-secondary">
+                        <i class="fas fa-list me-2"></i>View All Leads
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Leads</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><%= totalLeads %></div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                New Leads</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><%= newLeads %></div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-user-plus fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Active Leads</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><%= activeLeads %></div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-user-check fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Conversion Rate</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                <%= totalLeads > 0 ? Math.round((activeLeads / totalLeads) * 100) : 0 %>%
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-percentage fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Recent Leads -->
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Recent Leads</h6>
+                    <a href="/leads" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    <% if (recentLeads && recentLeads.length > 0) { %>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Status</th>
+                                        <th>Property</th>
+                                        <th>Last Contact</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% recentLeads.forEach(lead => { %>
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2">
+                                                        <%= lead.firstName.charAt(0) %><%= lead.lastName.charAt(0) %>
+                                                    </div>
+                                                    <div>
+                                                        <div class="fw-bold"><%= lead.firstName %> <%= lead.lastName %></div>
+                                                        <small class="text-muted"><%= lead.phone || 'No phone' %></small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td><%= lead.email %></td>
+                                            <td>
+                                                <%
+                                                    const statusColors = {
+                                                        'new': 'badge-secondary',
+                                                        'contacted': 'badge-info',
+                                                        'qualified': 'badge-warning',
+                                                        'proposal_sent': 'badge-primary',
+                                                        'negotiation': 'badge-warning',
+                                                        'closed': 'badge-success'
+                                                    };
+                                                    const statusLabels = {
+                                                        'new': 'New',
+                                                        'contacted': 'Contacted',
+                                                        'qualified': 'Qualified',
+                                                        'proposal_sent': 'Proposal Sent',
+                                                        'negotiation': 'Negotiation',
+                                                        'closed': 'Closed'
+                                                    };
+                                                %>
+                                                <span class="badge <%= statusColors[lead.status] || 'badge-secondary' %>">
+                                                    <%= statusLabels[lead.status] || lead.status %>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <% if (lead.relatedProperty) { %>
+                                                    <a href="/listings/<%= lead.relatedProperty._id %>" class="text-decoration-none">
+                                                        <%= lead.relatedProperty.title %>
+                                                    </a>
+                                                <% } else { %>
+                                                    <span class="text-muted">No property</span>
+                                                <% } %>
+                                            </td>
+                                            <td>
+                                                <% if (lead.lastContacted) { %>
+                                                    <%= new Date(lead.lastContacted).toLocaleDateString() %>
+                                                <% } else { %>
+                                                    <span class="text-muted">Never</span>
+                                                <% } %>
+                                            </td>
+                                            <td>
+                                                <a href="/leads/<%= lead._id %>" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    <% }); %>
+                                </tbody>
+                            </table>
+                        </div>
+                    <% } else { %>
+                        <div class="text-center py-4">
+                            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No leads yet</h5>
+                            <p class="text-muted">Start by adding your first lead or they will appear here when users inquire about properties.</p>
+                            <a href="/leads/new" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Add Your First Lead
+                            </a>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Tasks -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Upcoming Tasks</h6>
+                </div>
+                <div class="card-body">
+                    <% if (upcomingTasks && upcomingTasks.length > 0) { %>
+                        <div class="timeline">
+                            <% upcomingTasks.forEach(task => { %>
+                                <div class="timeline-item mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <div class="timeline-marker bg-warning me-3"></div>
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1"><%= task.title %></h6>
+                                            <p class="text-muted mb-1 small"><%= task.description %></p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <small class="text-muted">
+                                                    Due: <%= new Date(task.dueDate).toLocaleDateString() %>
+                                                </small>
+                                                <span class="badge bg-light text-dark">
+                                                    <%= task.priority %>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <% }); %>
+                        </div>
+                        <div class="text-center mt-3">
+                            <a href="/tasks" class="btn btn-sm btn-outline-primary">View All Tasks</a>
+                        </div>
+                    <% } else { %>
+                        <div class="text-center py-4">
+                            <i class="fas fa-tasks fa-3x text-muted mb-3"></i>
+                            <h6 class="text-muted">No upcoming tasks</h6>
+                            <p class="text-muted small">Tasks related to your leads will appear here.</p>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <a href="/leads/new" class="btn btn-outline-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center py-4">
+                                <i class="fas fa-user-plus fa-2x mb-2"></i>
+                                <span>Add New Lead</span>
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="/tasks/new" class="btn btn-outline-success w-100 h-100 d-flex flex-column align-items-center justify-content-center py-4">
+                                <i class="fas fa-tasks fa-2x mb-2"></i>
+                                <span>Create Task</span>
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="/leads?status=new" class="btn btn-outline-info w-100 h-100 d-flex flex-column align-items-center justify-content-center py-4">
+                                <i class="fas fa-user-clock fa-2x mb-2"></i>
+                                <span>New Leads</span>
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="/leads?status=contacted" class="btn btn-outline-warning w-100 h-100 d-flex flex-column align-items-center justify-content-center py-4">
+                                <i class="fas fa-phone fa-2x mb-2"></i>
+                                <span>Follow Up</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.border-left-primary {
+    border-left: 0.25rem solid #4e73df !important;
+}
+.border-left-success {
+    border-left: 0.25rem solid #1cc88a !important;
+}
+.border-left-info {
+    border-left: 0.25rem solid #36b9cc !important;
+}
+.border-left-warning {
+    border-left: 0.25rem solid #f6c23e !important;
+}
+.avatar-sm {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+}
+.timeline-marker {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+</style>

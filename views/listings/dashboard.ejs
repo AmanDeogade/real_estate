@@ -1,0 +1,889 @@
+<% layout("/layouts/boilerplate") %>
+
+<style>
+    .dashboard-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        border-radius: 15px;
+    }
+
+    .stats-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+        height: 100%;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stats-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .stats-number {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .stats-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    .table-container {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    .btn-view { background: #17a2b8; color: white; }
+    .btn-edit { background: #28a745; color: white; }
+    .btn-delete { background: #dc3545; color: white; }
+    .btn-assign { background: #ffc107; color: #212529; }
+
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .status-new { background: #17a2b8; color: white; }
+    .status-contacted { background: #ffc107; color: #212529; }
+    .status-visited { background: #28a745; color: white; }
+    .status-closed { background: #6c757d; color: white; }
+
+    .priority-badge {
+        padding: 0.25rem 0.5rem;
+        border-radius: 15px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+
+    .priority-low { background: #28a745; color: white; }
+    .priority-medium { background: #ffc107; color: #212529; }
+    .priority-high { background: #fd7e14; color: white; }
+    .priority-urgent { background: #dc3545; color: white; }
+
+    .task-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid #667eea;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .task-overdue {
+        border-left-color: #dc3545;
+        background: #fff5f5;
+    }
+
+    .task-due-soon {
+        border-left-color: #ffc107;
+        background: #fffbf0;
+    }
+
+    .lead-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid #28a745;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .lead-high-priority {
+        border-left-color: #dc3545;
+        background: #fff5f5;
+    }
+
+    .message-container {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+
+    .message-item {
+        border-bottom: 1px solid #e9ecef;
+        padding: 1rem 0;
+    }
+
+    .message-item:last-child {
+        border-bottom: none;
+    }
+
+    .message-sender {
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .message-time {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+
+    .message-content {
+        margin-top: 0.5rem;
+        color: #212529;
+    }
+
+    .quick-actions {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+
+    .action-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .action-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 10px;
+        text-decoration: none;
+        color: #495057;
+        transition: all 0.3s ease;
+    }
+
+    .action-item:hover {
+        background: #e9ecef;
+        transform: translateY(-2px);
+        color: #495057;
+        text-decoration: none;
+    }
+
+    .action-icon {
+        font-size: 1.5rem;
+        margin-right: 1rem;
+        color: #667eea;
+    }
+</style>
+
+<!-- Dashboard Header -->
+<div class="dashboard-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <% if (currUser.userType === 'property_owner') { %>
+                    <h1 class="display-5 mb-2">Property Management Dashboard</h1>
+                    <p class="lead mb-0">Manage your listings, track performance, and connect with potential buyers</p>
+                <% } else if (currUser.userType === 'broker') { %>
+                    <h1 class="display-5 mb-2">CRM Dashboard</h1>
+                    <p class="lead mb-0">Manage leads, track tasks, and close more deals</p>
+                <% } %>
+            </div>
+            <div class="col-lg-4 text-end">
+                <div class="d-flex gap-2 justify-content-end">
+                    <% if (currUser.userType === 'property_owner') { %>
+                        <a href="/listings/new" class="btn btn-light">
+                            <i class="fas fa-plus me-2"></i>Add Listing
+                        </a>
+                    <% } else if (currUser.userType === 'broker') { %>
+                        <a href="/leads/new" class="btn btn-light">
+                            <i class="fas fa-user-plus me-2"></i>Add Lead
+                        </a>
+                        <a href="/tasks/new" class="btn btn-light">
+                            <i class="fas fa-tasks me-2"></i>New Task
+                        </a>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="stats-card text-center">
+                <div class="stats-icon text-primary">
+                    <i class="fas fa-home"></i>
+                </div>
+                <div class="stats-number text-primary"><%= totalListings %></div>
+                <div class="stats-label">Total Listings</div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="stats-card text-center">
+                <div class="stats-icon text-success">
+                    <i class="fas fa-eye"></i>
+                </div>
+                <div class="stats-number text-success"><%= totalViews %></div>
+                <div class="stats-label">Total Views</div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="stats-card text-center">
+                <div class="stats-icon text-info">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stats-number text-info"><%= totalInquiries %></div>
+                <div class="stats-label">Total Inquiries</div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="stats-card text-center">
+                <div class="stats-icon text-warning">
+                    <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <div class="stats-number text-warning"><%= newInquiries %></div>
+                <div class="stats-label">New Inquiries</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Broker-specific CRM Features -->
+    <% if (currUser.userType === 'broker') { %>
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <h4 class="mb-3">Quick Actions</h4>
+            <div class="action-grid">
+                <a href="/leads/new" class="action-item">
+                    <i class="fas fa-user-plus action-icon"></i>
+                    <div>
+                        <strong>Add New Lead</strong>
+                        <div class="text-muted">Capture a new potential client</div>
+                    </div>
+                </a>
+                <a href="/tasks/new" class="action-item">
+                    <i class="fas fa-tasks action-icon"></i>
+                    <div>
+                        <strong>Create Task</strong>
+                        <div class="text-muted">Schedule follow-ups & activities</div>
+                    </div>
+                </a>
+                <a href="/leads" class="action-item">
+                    <i class="fas fa-users action-icon"></i>
+                    <div>
+                        <strong>View All Leads</strong>
+                        <div class="text-muted">Manage your lead pipeline</div>
+                    </div>
+                </a>
+                <a href="/tasks" class="action-item">
+                    <i class="fas fa-calendar-check action-icon"></i>
+                    <div>
+                        <strong>My Tasks</strong>
+                        <div class="text-muted">Track pending activities</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Recent Leads -->
+        <div class="table-container">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4>Recent Leads</h4>
+                <a href="/leads" class="btn btn-primary btn-sm">View All</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Interest</th>
+                            <th>Status</th>
+                            <th>Priority</th>
+                            <th>Last Contact</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (recentLeads && recentLeads.length > 0) { %>
+                            <% recentLeads.forEach(lead => { %>
+                                <tr>
+                                    <td>
+                                        <strong><%= lead.fullName %></strong><br>
+                                        <small class="text-muted"><%= lead.email %></small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info"><%= lead.interest %></span>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge status-<%= lead.status %>">
+                                            <%= lead.status.replace('_', ' ').toUpperCase() %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="priority-badge priority-<%= lead.priority %>">
+                                            <%= lead.priority.toUpperCase() %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            <%= lead.lastContacted ? new Date(lead.lastContacted).toLocaleDateString() : 'Never' %>
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <a href="/leads/<%= lead._id %>" class="btn btn-sm btn-view" title="View Lead">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <button class="btn btn-sm btn-edit" title="Contact Lead"
+                                                    onclick="contactLead('<%= lead._id %>')">
+                                                <i class="fas fa-phone"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">No leads found</td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Recent Tasks -->
+        <div class="table-container">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4>Recent Tasks</h4>
+                <a href="/tasks" class="btn btn-primary btn-sm">View All</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Task</th>
+                            <th>Type</th>
+                            <th>Priority</th>
+                            <th>Due Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (recentTasks && recentTasks.length > 0) { %>
+                            <% recentTasks.forEach(task => { %>
+                                <tr>
+                                    <td>
+                                        <strong><%= task.title %></strong><br>
+                                        <small class="text-muted"><%= task.description %></small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary"><%= task.type.replace('_', ' ').toUpperCase() %></span>
+                                    </td>
+                                    <td>
+                                        <span class="priority-badge priority-<%= task.priority %>">
+                                            <%= task.priority.toUpperCase() %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="<%= task.isOverdue ? 'text-danger' : task.isDueSoon ? 'text-warning' : '' %>">
+                                            <%= new Date(task.dueDate).toLocaleDateString() %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge status-<%= task.status %>">
+                                            <%= task.status.replace('_', ' ').toUpperCase() %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <a href="/tasks/<%= task._id %>" class="btn btn-sm btn-view" title="View Task">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <button class="btn btn-sm btn-edit" title="Mark Complete"
+                                                    onclick="completeTask('<%= task._id %>')">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">No tasks found</td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Internal Messages -->
+        <div class="message-container">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4>Recent Messages</h4>
+                <a href="/messages" class="btn btn-primary btn-sm">View All</a>
+            </div>
+            <% if (recentMessages && recentMessages.length > 0) { %>
+                <% recentMessages.forEach(message => { %>
+                    <div class="message-item">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="message-sender"><%= message.sender.fullName %></div>
+                            <div class="message-time"><%= new Date(message.createdAt).toLocaleString() %></div>
+                        </div>
+                        <div class="message-content"><%= message.content %></div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <p class="text-muted text-center">No recent messages</p>
+            <% } %>
+        </div>
+    <% } %>
+
+    <!-- Property Listings Table -->
+    <div class="table-container">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4>My Listings</h4>
+            <% if (currUser.userType === 'property_owner') { %>
+                <a href="/listings/new" class="btn btn-primary btn-sm">Add New Listing</a>
+            <% } %>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Property</th>
+                        <th>Type</th>
+                        <th>Price</th>
+                        <th>Status</th>
+                        <th>Views</th>
+                        <th>Inquiries</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (listings && listings.length > 0) { %>
+                        <% listings.forEach(listing => { %>
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img src="<%= listing.images && listing.images.length > 0 ? listing.images[0].url : '/images/default-property.jpg' %>" alt="<%= listing.title %>" 
+                                             style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;" class="me-3">
+                                        <div>
+                                            <strong><%= listing.title %></strong><br>
+                                            <small class="text-muted"><%= (listing.address && listing.address.city ? listing.address.city : '') + (listing.address && listing.address.state ? ', ' + listing.address.state : '') %></small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary"><%= listing.propertyType ? listing.propertyType.toUpperCase() : '' %></span>
+                                </td>
+                                <td>
+                                    <strong>₹<%= listing.price && listing.price.amount ? listing.price.amount.toLocaleString('en-IN') : 0 %></strong><br>
+                                    <small class="text-muted"><%= listing.listingType === 'rent' ? '/month' : '' %></small>
+                                </td>
+                                <td>
+                                    <span class="status-badge status-<%= listing.status %>">
+                                        <%= listing.status.replace('_', ' ').toUpperCase() %>
+                                    </span>
+                                </td>
+                                <td><%= listing.views || 0 %></td>
+                                <td><%= listing.inquiries ? listing.inquiries.length : 0 %></td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <a href="/listings/<%= listing._id %>" class="btn btn-sm btn-view" title="View Property">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="/listings/<%= listing._id %>/edit" class="btn btn-sm btn-edit" title="Edit Property">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <% if (currUser.userType === 'property_owner') { %>
+                                            <button class="btn btn-sm btn-assign" title="Assign Broker"
+                                                    onclick="assignBroker('<%= listing._id %>', '<%= listing.title %>')">
+                                                <i class="fas fa-user-tie"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-edit" title="Update Status"
+                                                    onclick="updateStatus('<%= listing._id %>')">
+                                                <i class="fas fa-tags"></i>
+                                            </button>
+                                        <% } %>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">No listings found</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Recent Inquiries -->
+    <div class="table-container">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4>Recent Inquiries</h4>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Property</th>
+                        <th>Interest</th>
+                        <th>Contact Preference</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (recentInquiries && recentInquiries.length > 0) { %>
+                        <% recentInquiries.forEach(inquiry => { %>
+                            <tr>
+                                <td>
+                                    <strong><%= inquiry.user.fullName %></strong><br>
+                                    <small class="text-muted"><%= inquiry.user.email %></small>
+                                </td>
+                                <td>
+                                    <a href="/listings/<%= inquiry.listing._id %>" class="text-decoration-none">
+                                        <%= inquiry.listing.title %>
+                                    </a>
+                                </td>
+                                <td>
+                                    <span class="badge bg-warning"
+                                          data-bs-toggle="tooltip"
+                                          data-bs-placement="top"
+                                          title="<%= inquiry.message || 'No message provided' %>">
+                                        <%= inquiry.interest %>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">
+                                        <i class="fas fa-<%= inquiry.contactPreference === 'phone' ? 'phone' : inquiry.contactPreference === 'whatsapp' ? 'whatsapp' : 'envelope' %> me-1"></i>
+                                        <%= inquiry.contactPreference.toUpperCase() %>
+                                    </span>
+                                </td>
+                                <td>
+                                    <select class="form-select form-select-sm" style="width: auto;"
+                                            onchange="updateInquiryStatus('<%= inquiry.listing._id %>', '<%= inquiry.user._id %>', this.value)">
+                                        <option value="new" <%= inquiry.status === 'new' ? 'selected' : '' %>>New</option>
+                                        <option value="contacted" <%= inquiry.status === 'contacted' ? 'selected' : '' %>>Contacted</option>
+                                        <option value="visited" <%= inquiry.status === 'visited' ? 'selected' : '' %>>Visited</option>
+                                        <option value="closed" <%= inquiry.status === 'closed' ? 'selected' : '' %>>Closed</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <small class="text-muted">
+                                        <%= new Date(inquiry.createdAt).toLocaleDateString() %>
+                                    </small>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <a href="/listings/<%= inquiry.listing._id %>" class="btn btn-sm btn-view" title="View Property">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <button class="btn btn-sm btn-edit" title="Contact User"
+                                                onclick="contactUser('<%= inquiry.user._id %>')">
+                                            <i class="fas fa-phone"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">No inquiries found</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Broker Assignment Modal -->
+<div class="modal fade" id="brokerAssignmentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Assign Broker</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="brokerAssignmentForm">
+                    <input type="hidden" id="listingId" name="listingId">
+                    <div class="mb-3">
+                        <label for="brokerId" class="form-label">Select Broker</label>
+                        <select class="form-select" id="brokerId" name="brokerId" required>
+                            <option value="">Choose a broker...</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="brokerNotes" class="form-label">Notes</label>
+                        <textarea class="form-control" id="brokerNotes" name="brokerNotes" rows="3" 
+                                  placeholder="Any specific instructions or notes for the broker..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="brokerAssignmentForm" class="btn btn-primary">Assign Broker</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Property Status Modal -->
+<div class="modal fade" id="statusUpdateModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Property Status</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="statusUpdateForm">
+                    <input type="hidden" id="statusListingId" name="listingId">
+                    <div class="mb-3">
+                        <label for="status" class="form-label">New Status</label>
+                        <select class="form-select" id="status" name="status" required>
+                            <option value="">Select status...</option>
+                            <option value="active">Active</option>
+                            <option value="under_offer">Under Offer</option>
+                            <option value="sold">Sold</option>
+                            <option value="rented">Rented</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="statusNotes" class="form-label">Notes</label>
+                        <textarea class="form-control" id="statusNotes" name="notes" rows="3" 
+                                  placeholder="Any notes about this status change..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="statusUpdateForm" class="btn btn-primary">Update Status</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Toast notification function
+    function showToast(title, message, type) {
+        // Create toast container if it doesn't exist
+        let toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.id = 'toast-container';
+            toastContainer.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999;';
+            document.body.appendChild(toastContainer);
+        }
+
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show`;
+        toast.style.cssText = 'min-width: 300px; margin-bottom: 10px;';
+
+        const icon = type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle';
+        const iconClass = type === 'success' ? 'text-success' : type === 'error' ? 'text-danger' : 'text-info';
+
+        toast.innerHTML = `
+            <div class="d-flex align-items-center">
+                <i class="fas fa-${icon} ${iconClass} me-2"></i>
+                <div class="flex-grow-1">
+                    <strong>${title}</strong><br>
+                    <small>${message}</small>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+
+        toastContainer.appendChild(toast);
+
+        // Auto-remove after 4 seconds
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.remove();
+            }
+        }, 4000);
+    }
+
+    // Broker assignment functions
+    function assignBroker(listingId, listingTitle) {
+        document.getElementById('listingId').value = listingId;
+        document.getElementById('brokerAssignmentModal').querySelector('.modal-title').textContent = `Assign Broker - ${listingTitle}`;
+        loadBrokers();
+        new bootstrap.Modal(document.getElementById('brokerAssignmentModal')).show();
+    }
+
+    async function loadBrokers() {
+        try {
+            const response = await fetch('/listings/api/brokers');
+            const data = await response.json();
+            
+            const brokerSelect = document.getElementById('brokerId');
+            brokerSelect.innerHTML = '<option value="">Choose a broker...</option>';
+            
+            data.brokers.forEach(broker => {
+                const option = document.createElement('option');
+                option.value = broker._id;
+                option.textContent = broker.fullName;
+                brokerSelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error loading brokers:', error);
+            showToast('Error', 'Failed to load brokers', 'error');
+        }
+    }
+
+    // Status update functions
+    function updateStatus(listingId) {
+        document.getElementById('statusListingId').value = listingId;
+        new bootstrap.Modal(document.getElementById('statusUpdateModal')).show();
+    }
+
+    // Form submission handlers
+    document.getElementById('brokerAssignmentForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData);
+        
+        try {
+            const response = await fetch('/listings/assign-broker', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showToast('Success', 'Broker assigned successfully', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('brokerAssignmentModal')).hide();
+                location.reload();
+            } else {
+                showToast('Error', result.message, 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showToast('Error', 'Failed to assign broker', 'error');
+        }
+    });
+
+    document.getElementById('statusUpdateForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData);
+        
+        try {
+            const response = await fetch('/listings/update-status', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showToast('Success', 'Status updated successfully', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('statusUpdateModal')).hide();
+                location.reload();
+            } else {
+                showToast('Error', result.message, 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showToast('Error', 'Failed to update status', 'error');
+        }
+    });
+
+    // Inquiry status update
+    async function updateInquiryStatus(listingId, userId, status) {
+        const select = event.target;
+        const originalValue = select.value;
+        
+        // Show loading state
+        select.disabled = true;
+        select.innerHTML = '<option>Updating...</option>';
+        
+        try {
+            const response = await fetch('/listings/update-inquiry-status', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ listingId, userId, status })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showToast('Success', 'Inquiry status updated successfully', 'success');
+                // Reload the page to show updated status
+                location.reload();
+            } else {
+                showToast('Error', result.message, 'error');
+                // Revert to original value on error
+                select.value = originalValue;
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showToast('Error', 'Failed to update inquiry status', 'error');
+            // Revert to original value on error
+            select.value = originalValue;
+        } finally {
+            // Re-enable select
+            select.disabled = false;
+        }
+    }
+
+    // Placeholder functions for future implementation
+    function contactUser(userId) {
+        showToast('Info', 'Contact functionality coming soon', 'info');
+    }
+
+    function contactLead(leadId) {
+        showToast('Info', 'Lead contact functionality coming soon', 'info');
+    }
+
+    function completeTask(taskId) {
+        showToast('Info', 'Task completion functionality coming soon', 'info');
+    }
+
+    // Initialize Bootstrap tooltips
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>

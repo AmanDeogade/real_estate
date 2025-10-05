@@ -1,0 +1,764 @@
+<% layout("/layouts/boilerplate") %>
+
+<style>
+    .buyer-dashboard {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 0;
+    }
+
+    .dashboard-header {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        padding: 2rem 0;
+        color: white;
+        margin-bottom: 2rem;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #667eea;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        color: #7f8c8d;
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .recommendation-section {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #f8f9fa;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin: 0;
+    }
+
+    .section-subtitle {
+        color: #7f8c8d;
+        margin: 0.5rem 0 0 0;
+    }
+
+    .properties-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .property-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        border: 1px solid #f1f3f4;
+    }
+
+    .property-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    .property-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+
+    .property-content {
+        padding: 1.5rem;
+    }
+
+    .recommendation-badge {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        display: inline-block;
+    }
+
+    .property-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+        line-height: 1.3;
+    }
+
+    .property-location {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .property-details {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .detail-item {
+        text-align: center;
+        padding: 0.5rem;
+        background: #f8f9fa;
+        border-radius: 6px;
+    }
+
+    .detail-value {
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 1rem;
+    }
+
+    .detail-label {
+        color: #7f8c8d;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+    }
+
+    .property-price {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #27ae60;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    .location-score {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+        padding: 0.5rem;
+        background: #e8f5e8;
+        border-radius: 8px;
+    }
+
+    .score-value {
+        font-weight: 600;
+        color: #2e7d32;
+        margin-left: 0.5rem;
+    }
+
+    .property-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-view {
+        flex: 1;
+        background: #667eea;
+        border: none;
+        color: white;
+        padding: 0.75rem;
+        border-radius: 8px;
+        text-decoration: none;
+        text-align: center;
+        transition: background 0.3s ease;
+        font-weight: 600;
+    }
+
+    .btn-view:hover {
+        background: #5a6fd8;
+        color: white;
+    }
+
+    .btn-favorite {
+        background: #e74c3c;
+        border: none;
+        color: white;
+        padding: 0.75rem;
+        border-radius: 8px;
+        transition: background 0.3s ease;
+        width: 50px;
+    }
+
+    .btn-favorite:hover {
+        background: #c0392b;
+        color: white;
+    }
+
+    .btn-favorite.active {
+        background: #27ae60;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #7f8c8d;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .tabs {
+        display: flex;
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 0.25rem;
+        margin-bottom: 2rem;
+    }
+
+    .tab {
+        flex: 1;
+        padding: 0.75rem 1rem;
+        text-align: center;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+    }
+
+    .tab.active {
+        background: white;
+        color: #667eea;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .tab-content {
+        display: none;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    .refresh-btn {
+        background: #667eea;
+        border: none;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+
+    .refresh-btn:hover {
+        background: #5a6fd8;
+    }
+
+    .loading-spinner {
+        text-align: center;
+        padding: 2rem;
+        color: #7f8c8d;
+    }
+</style>
+
+<div class="buyer-dashboard">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="mb-2">Welcome back, <%= user.firstName %>!</h1>
+                    <p class="mb-0">Here are your personalized property recommendations</p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <button class="refresh-btn" onclick="refreshRecommendations()">
+                        <i class="fas fa-sync-alt me-2"></i>Refresh Recommendations
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Statistics Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number"><%= stats.totalFavorites %></div>
+                <div class="stat-label">Total Favorites</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number"><%= stats.highInterestFavorites %></div>
+                <div class="stat-label">High Interest</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number"><%= stats.readyToBuyFavorites %></div>
+                <div class="stat-label">Ready to Buy</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number"><%= stats.avgLocationScore %></div>
+                <div class="stat-label">Avg Location Score</div>
+            </div>
+        </div>
+
+        <!-- Recommendation Tabs -->
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('personalized')">
+                <i class="fas fa-star me-2"></i>Personalized
+            </div>
+            <div class="tab" onclick="switchTab('nearby')">
+                <i class="fas fa-map-marker-alt me-2"></i>Nearby
+            </div>
+            <div class="tab" onclick="switchTab('highscore')">
+                <i class="fas fa-chart-line me-2"></i>High Scores
+            </div>
+            <div class="tab" onclick="switchTab('trending')">
+                <i class="fas fa-fire me-2"></i>Trending
+            </div>
+        </div>
+
+        <!-- Personalized Recommendations -->
+        <div id="personalized-tab" class="tab-content active">
+            <div class="recommendation-section">
+                <div class="section-header">
+                    <div>
+                        <h3 class="section-title">🎯 Personalized for You</h3>
+                        <p class="section-subtitle">Properties matching your preferences and favorites</p>
+                    </div>
+                </div>
+                <div id="personalized-content">
+                    <% if (recommendations.personalized && recommendations.personalized.length > 0) { %>
+                        <div class="properties-grid">
+                            <% recommendations.personalized.forEach(property => { %>
+                                <div class="property-card">
+                                    <img src="<%= property.images && property.images.length > 0 ? property.images[0].url : '/images/default-property.jpg' %>" 
+                                         alt="<%= property.title %>" class="property-image">
+                                    
+                                    <div class="property-content">
+                                        <div class="recommendation-badge">
+                                            <i class="fas fa-star me-1"></i>
+                                            <%= RecommendationService.getRecommendationReasons(property.recommendationType) %>
+                                        </div>
+                                        
+                                        <h4 class="property-title"><%= property.title %></h4>
+                                        <div class="property-location">
+                                            <i class="fas fa-map-marker-alt me-2"></i>
+                                            <%= property.address?.city %>, <%= property.address?.state %>
+                                        </div>
+                                        
+                                        <div class="property-details">
+                                            <div class="detail-item">
+                                                <div class="detail-value"><%= property.bedrooms || 'N/A' %></div>
+                                                <div class="detail-label">Bedrooms</div>
+                                            </div>
+                                            <div class="detail-item">
+                                                <div class="detail-value"><%= property.bathrooms || 'N/A' %></div>
+                                                <div class="detail-label">Bathrooms</div>
+                                            </div>
+                                            <div class="detail-item">
+                                                <div class="detail-value"><%= property.area?.size || 'N/A' %></div>
+                                                <div class="detail-label"><%= property.area?.unit || 'sqft' %></div>
+                                            </div>
+                                        </div>
+
+                                        <% if (property.locationScores && property.locationScores.overallScore) { %>
+                                            <div class="location-score">
+                                                <i class="fas fa-map-pin text-success"></i>
+                                                <span>Location Score:</span>
+                                                <span class="score-value"><%= property.locationScores.overallScore %>/100</span>
+                                            </div>
+                                        <% } %>
+                                        
+                                        <div class="property-price">
+                                            ₹<%= property.price?.amount?.toLocaleString() || 'N/A' %>
+                                            <small class="d-block text-muted">
+                                                <%= property.listingType === 'rent' ? '/month' : '' %>
+                                            </small>
+                                        </div>
+                                        
+                                        <div class="property-actions">
+                                            <a href="/listings/<%= property._id %>" class="btn-view">
+                                                <i class="fas fa-eye me-2"></i>View Details
+                                            </a>
+                                            <button class="btn-favorite" onclick="toggleFavorite('<%= property._id %>')" 
+                                                    data-property-id="<%= property._id %>">
+                                                <i class="fas fa-heart"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            <% }); %>
+                        </div>
+                    <% } else { %>
+                        <div class="empty-state">
+                            <i class="fas fa-search"></i>
+                            <h3>No Personalized Recommendations Yet</h3>
+                            <p>Add some properties to your favorites to get personalized recommendations!</p>
+                            <a href="/listings" class="btn btn-primary">Browse Properties</a>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nearby Recommendations -->
+        <div id="nearby-tab" class="tab-content">
+            <div class="recommendation-section">
+                <div class="section-header">
+                    <div>
+                        <h3 class="section-title">📍 Near Your Favorites</h3>
+                        <p class="section-subtitle">Properties close to your favorite locations</p>
+                    </div>
+                </div>
+                <div id="nearby-content">
+                    <div class="loading-spinner">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Loading nearby properties...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- High Score Recommendations -->
+        <div id="highscore-tab" class="tab-content">
+            <div class="recommendation-section">
+                <div class="section-header">
+                    <div>
+                        <h3 class="section-title">🏆 High Location Scores</h3>
+                        <p class="section-subtitle">Properties with excellent location ratings</p>
+                    </div>
+                </div>
+                <div id="highscore-content">
+                    <div class="loading-spinner">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Loading high-scoring properties...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trending Recommendations -->
+        <div id="trending-tab" class="tab-content">
+            <div class="recommendation-section">
+                <div class="section-header">
+                    <div>
+                        <h3 class="section-title">🔥 Trending Properties</h3>
+                        <p class="section-subtitle">Most popular properties in your area</p>
+                    </div>
+                </div>
+                <div id="trending-content">
+                    <div class="loading-spinner">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Loading trending properties...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Favorites Section -->
+        <% if (recentFavorites && recentFavorites.length > 0) { %>
+        <div class="recommendation-section">
+            <div class="section-header">
+                <div>
+                    <h3 class="section-title">❤️ Your Recent Favorites</h3>
+                    <p class="section-subtitle">Properties you've recently added to favorites</p>
+                </div>
+                <div>
+                    <a href="/buyers/favorites" class="btn btn-outline-primary">View All</a>
+                </div>
+            </div>
+            <div class="properties-grid">
+                <% recentFavorites.forEach(favorite => { %>
+                    <div class="property-card">
+                        <img src="<%= favorite.property.images && favorite.property.images.length > 0 ? favorite.property.images[0].url : '/images/default-property.jpg' %>" 
+                             alt="<%= favorite.property.title %>" class="property-image">
+                        
+                        <div class="property-content">
+                            <div class="recommendation-badge" style="background: #e74c3c;">
+                                <i class="fas fa-heart me-1"></i>Your Favorite
+                            </div>
+                            
+                            <h4 class="property-title"><%= favorite.property.title %></h4>
+                            <div class="property-location">
+                                <i class="fas fa-map-marker-alt me-2"></i>
+                                <%= favorite.property.address?.city %>, <%= favorite.property.address?.state %>
+                            </div>
+                            
+                            <div class="property-details">
+                                <div class="detail-item">
+                                    <div class="detail-value"><%= favorite.property.bedrooms || 'N/A' %></div>
+                                    <div class="detail-label">Bedrooms</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-value"><%= favorite.property.bathrooms || 'N/A' %></div>
+                                    <div class="detail-label">Bathrooms</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-value"><%= favorite.property.area?.size || 'N/A' %></div>
+                                    <div class="detail-label"><%= favorite.property.area?.unit || 'sqft' %></div>
+                                </div>
+                            </div>
+
+                            <% if (favorite.property.locationScores && favorite.property.locationScores.overallScore) { %>
+                                <div class="location-score">
+                                    <i class="fas fa-map-pin text-success"></i>
+                                    <span>Location Score:</span>
+                                    <span class="score-value"><%= favorite.property.locationScores.overallScore %>/100</span>
+                                </div>
+                            <% } %>
+                            
+                            <div class="property-price">
+                                ₹<%= favorite.property.price?.amount?.toLocaleString() || 'N/A' %>
+                                <small class="d-block text-muted">
+                                    <%= favorite.property.listingType === 'rent' ? '/month' : '' %>
+                                </small>
+                            </div>
+                            
+                            <div class="property-actions">
+                                <a href="/listings/<%= favorite.property._id %>" class="btn-view">
+                                    <i class="fas fa-eye me-2"></i>View Details
+                                </a>
+                                <button class="btn-favorite active" onclick="toggleFavorite('<%= favorite.property._id %>')" 
+                                        data-property-id="<%= favorite.property._id %>">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        </div>
+        <% } %>
+    </div>
+</div>
+
+<script>
+    // Tab switching functionality
+    function switchTab(tabName) {
+        // Remove active class from all tabs and contents
+        document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        
+        // Add active class to selected tab and content
+        event.target.classList.add('active');
+        document.getElementById(tabName + '-tab').classList.add('active');
+        
+        // Load content for the selected tab
+        loadTabContent(tabName);
+    }
+
+    // Load content for specific tabs
+    async function loadTabContent(tabName) {
+        const contentDiv = document.getElementById(tabName + '-content');
+        
+        // Don't reload if content is already loaded
+        if (contentDiv.innerHTML.includes('property-card')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/buyers/api/recommendations?type=${tabName}&limit=8`);
+            const data = await response.json();
+            
+            if (data.success) {
+                renderRecommendations(contentDiv, data.recommendations, tabName);
+            } else {
+                contentDiv.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><h3>Error Loading Recommendations</h3><p>Please try again later.</p></div>';
+            }
+        } catch (error) {
+            console.error('Error loading tab content:', error);
+            contentDiv.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><h3>Error Loading Recommendations</h3><p>Please try again later.</p></div>';
+        }
+    }
+
+    // Render recommendations in a grid
+    function renderRecommendations(container, recommendations, type) {
+        if (!recommendations || recommendations.length === 0) {
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-search"></i><h3>No Recommendations Found</h3><p>Try adjusting your preferences or browse more properties.</p></div>';
+            return;
+        }
+
+        const gridHTML = `
+            <div class="properties-grid">
+                ${recommendations.map(property => `
+                    <div class="property-card">
+                        <img src="${property.images && property.images.length > 0 ? property.images[0].url : '/images/default-property.jpg'}" 
+                             alt="${property.title}" class="property-image">
+                        
+                        <div class="property-content">
+                            <div class="recommendation-badge">
+                                <i class="fas fa-star me-1"></i>
+                                ${getRecommendationReason(type)}
+                            </div>
+                            
+                            <h4 class="property-title">${property.title}</h4>
+                            <div class="property-location">
+                                <i class="fas fa-map-marker-alt me-2"></i>
+                                ${property.address?.city || 'N/A'}, ${property.address?.state || 'N/A'}
+                            </div>
+                            
+                            <div class="property-details">
+                                <div class="detail-item">
+                                    <div class="detail-value">${property.bedrooms || 'N/A'}</div>
+                                    <div class="detail-label">Bedrooms</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-value">${property.bathrooms || 'N/A'}</div>
+                                    <div class="detail-label">Bathrooms</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-value">${property.area?.size || 'N/A'}</div>
+                                    <div class="detail-label">${property.area?.unit || 'sqft'}</div>
+                                </div>
+                            </div>
+
+                            ${property.locationScores && property.locationScores.overallScore ? `
+                                <div class="location-score">
+                                    <i class="fas fa-map-pin text-success"></i>
+                                    <span>Location Score:</span>
+                                    <span class="score-value">${property.locationScores.overallScore}/100</span>
+                                </div>
+                            ` : ''}
+                            
+                            <div class="property-price">
+                                ₹${property.price?.amount?.toLocaleString() || 'N/A'}
+                                <small class="d-block text-muted">
+                                    ${property.listingType === 'rent' ? '/month' : ''}
+                                </small>
+                            </div>
+                            
+                            <div class="property-actions">
+                                <a href="/listings/${property._id}" class="btn-view">
+                                    <i class="fas fa-eye me-2"></i>View Details
+                                </a>
+                                <button class="btn-favorite" onclick="toggleFavorite('${property._id}')" 
+                                        data-property-id="${property._id}">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+        
+        container.innerHTML = gridHTML;
+        
+        // Check favorite status for new properties
+        container.querySelectorAll('.btn-favorite').forEach(btn => {
+            const propertyId = btn.dataset.propertyId;
+            checkFavoriteStatus(propertyId, btn);
+        });
+    }
+
+    // Get recommendation reason text
+    function getRecommendationReason(type) {
+        const reasons = {
+            'nearby': 'Near your favorites',
+            'highscore': 'Excellent location',
+            'trending': 'Trending now'
+        };
+        return reasons[type] || 'Recommended for you';
+    }
+
+    // Toggle favorite functionality
+    function toggleFavorite(propertyId) {
+        const btn = event.target.closest('.btn-favorite');
+        
+        fetch('/favorites/toggle', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ propertyId: propertyId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.action === 'added') {
+                btn.classList.add('active');
+                showToast('Property added to favorites!', 'success');
+            } else {
+                btn.classList.remove('active');
+                showToast('Property removed from favorites!', 'info');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('Error updating favorites!', 'error');
+        });
+    }
+
+    // Check favorite status
+    function checkFavoriteStatus(propertyId, btn) {
+        fetch(`/favorites/check/${propertyId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.isFavorite) {
+                    btn.classList.add('active');
+                }
+            })
+            .catch(error => console.error('Error checking favorite status:', error));
+    }
+
+    // Refresh recommendations
+    function refreshRecommendations() {
+        const activeTab = document.querySelector('.tab.active').onclick.toString().match(/'([^']+)'/)[1];
+        loadTabContent(activeTab);
+        showToast('Recommendations refreshed!', 'success');
+    }
+
+    // Show toast notification
+    function showToast(message, type) {
+        const toast = document.createElement('div');
+        toast.className = `alert alert-${type === 'error' ? 'danger' : type} position-fixed`;
+        toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        toast.innerHTML = message;
+        
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check favorite status for personalized recommendations
+        document.querySelectorAll('.btn-favorite').forEach(btn => {
+            const propertyId = btn.dataset.propertyId;
+            checkFavoriteStatus(propertyId, btn);
+        });
+    });
+</script>
+
+

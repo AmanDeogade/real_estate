@@ -1,0 +1,686 @@
+<% layout("/layouts/boilerplate") %>
+
+<style>
+    .search-hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 3rem 0;
+        color: white;
+        margin-bottom: 2rem;
+    }
+
+    .search-form-container {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 2rem;
+        border-radius: 20px;
+        backdrop-filter: blur(15px);
+        margin-bottom: 2rem;
+    }
+
+    .filter-section {
+        background: white;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+
+    .filter-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .filter-label {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .filter-input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #e1e8ed;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+    }
+
+    .filter-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .filter-select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #e1e8ed;
+        border-radius: 8px;
+        font-size: 1rem;
+        background: white;
+        cursor: pointer;
+    }
+
+    .filter-checkbox {
+        margin-right: 0.5rem;
+    }
+
+    .filter-checkbox-label {
+        margin-right: 1rem;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .search-btn {
+        background: #667eea;
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 25px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+
+    .search-btn:hover {
+        background: #5a6fd8;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .clear-btn {
+        background: #95a5a6;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 20px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 1rem;
+        width: 100%;
+    }
+
+    .clear-btn:hover {
+        background: #7f8c8d;
+    }
+
+    .results-section {
+        margin-top: 2rem;
+    }
+
+    .results-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding: 1rem 0;
+        border-bottom: 2px solid #e1e8ed;
+    }
+
+    .results-count {
+        font-size: 1.2rem;
+        color: #2c3e50;
+        font-weight: 600;
+    }
+
+    .sort-select {
+        padding: 0.5rem 1rem;
+        border: 2px solid #e1e8ed;
+        border-radius: 8px;
+        font-size: 1rem;
+        background: white;
+        cursor: pointer;
+    }
+
+    .listing-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+
+    .listing-card {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .listing-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    .listing-image {
+        height: 250px;
+        width: 100%;
+        object-fit: cover;
+    }
+
+    .listing-badge {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: #ff6b6b;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .special-owner-badge {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        background: linear-gradient(135deg, #ffd700, #ffed4e);
+        color: #8b6914;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+        z-index: 10;
+    }
+
+    .listing-content {
+        padding: 1.5rem;
+    }
+
+    .listing-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+        line-height: 1.3;
+    }
+
+    .listing-location {
+        color: #7f8c8d;
+        font-size: 1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .listing-price {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #27ae60;
+        margin-bottom: 1rem;
+    }
+
+    .listing-details {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+        color: #7f8c8d;
+    }
+
+    .listing-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .btn-primary {
+        background: #667eea;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        text-decoration: none;
+        text-align: center;
+        flex: 1;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background: #5a6fd8;
+        transform: translateY(-2px);
+    }
+
+    .btn-outline {
+        background: transparent;
+        color: #667eea;
+        padding: 0.75rem 1.5rem;
+        border: 2px solid #667eea;
+        border-radius: 8px;
+        text-decoration: none;
+        text-align: center;
+        flex: 1;
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline:hover {
+        background: #667eea;
+        color: white;
+    }
+
+    .favorite-btn {
+        background: #ff6b6b;
+        color: white;
+        border: none;
+        padding: 0.75rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 1.2rem;
+    }
+
+    .favorite-btn:hover {
+        background: #ff5252;
+        transform: scale(1.1);
+    }
+
+    .favorite-btn.favorited {
+        background: #e74c3c;
+    }
+
+    .no-results {
+        text-align: center;
+        padding: 3rem;
+        color: #7f8c8d;
+    }
+
+    .no-results h3 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 3rem;
+    }
+
+    .page-btn {
+        padding: 0.75rem 1rem;
+        border: 2px solid #e1e8ed;
+        background: white;
+        color: #2c3e50;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .page-btn:hover, .page-btn.active {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+    }
+
+    @media (max-width: 768px) {
+        .listing-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .search-form-container {
+            padding: 1rem;
+        }
+        
+        .filter-section {
+            padding: 1rem;
+        }
+    }
+</style>
+
+<div class="search-hero">
+    <div class="container">
+    <h1 class="text-center mb-4">Explore Properties</h1>
+    <p class="text-center mb-4">Search through thousands of properties using filters</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="search-form-container">
+        <form id="searchForm" method="GET" action="/listings/search">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="filter-group">
+                        <label class="filter-label">Location</label>
+                        <input type="text" name="location" class="filter-input" placeholder="City, State, or Area" value="<%= locals.query?.location || '' %>">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="filter-group">
+                        <label class="filter-label">Property Type</label>
+                        <select name="propertyType" class="filter-select">
+                            <option value="">All Types</option>
+                            <option value="apartment" <%= locals.query?.propertyType === 'apartment' ? 'selected' : '' %>>Apartment</option>
+                            <option value="house" <%= locals.query?.propertyType === 'house' ? 'selected' : '' %>>House</option>
+                            <option value="villa" <%= locals.query?.propertyType === 'villa' ? 'selected' : '' %>>Villa</option>
+                            <option value="commercial" <%= locals.query?.propertyType === 'commercial' ? 'selected' : '' %>>Commercial</option>
+                            <option value="land" <%= locals.query?.propertyType === 'land' ? 'selected' : '' %>>Land</option>
+                            <option value="office" <%= locals.query?.propertyType === 'office' ? 'selected' : '' %>>Office</option>
+                            <option value="shop" <%= locals.query?.propertyType === 'shop' ? 'selected' : '' %>>Shop</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="filter-group">
+                        <label class="filter-label">Purpose</label>
+                        <select name="listingType" class="filter-select">
+                            <option value="">Any</option>
+                            <option value="sale" <%= locals.query?.listingType === 'sale' ? 'selected' : '' %>>For Sale</option>
+                            <option value="rent" <%= locals.query?.listingType === 'rent' ? 'selected' : '' %>>For Rent</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-3">
+                <div class="col-md-6">
+                    <button type="submit" id="searchBtn" class="search-btn">Search</button>
+                </div>
+                <div class="col-md-6">
+                    <button type="button" class="clear-btn" onclick="clearFilters()">Clear</button>
+                </div>
+            </div>
+        </form>
+    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Bedrooms</label>
+                        <select name="bedrooms" class="filter-select">
+                            <option value="">Any</option>
+                            <option value="1" <%= locals.query?.bedrooms === '1' ? 'selected' : '' %>>1</option>
+                            <option value="2" <%= locals.query?.bedrooms === '2' ? 'selected' : '' %>>2</option>
+                            <option value="3" <%= locals.query?.bedrooms === '3' ? 'selected' : '' %>>3</option>
+                            <option value="4" <%= locals.query?.bedrooms === '4' ? 'selected' : '' %>>4</option>
+                            <option value="5+" <%= locals.query?.bedrooms === '5+' ? 'selected' : '' %>>5+</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="filter-group">
+                        <label class="filter-label">Bathrooms</label>
+                        <select name="bathrooms" class="filter-select">
+                            <option value="">Any</option>
+                            <option value="1" <%= locals.query?.bedrooms === '1' ? 'selected' : '' %>>1</option>
+                            <option value="2" <%= locals.query?.bedrooms === '2' ? 'selected' : '' %>>2</option>
+                            <option value="3" <%= locals.query?.bedrooms === '3' ? 'selected' : '' %>>3</option>
+                            <option value="4+" <%= locals.query?.bedrooms === '4+' ? 'selected' : '' %>>4+</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="filter-group">
+                        <label class="filter-label">Min Area (sqft)</label>
+                        <input type="number" name="minArea" class="filter-input" placeholder="Min Area" value="<%= locals.query?.minArea || '' %>">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="filter-group">
+                        <label class="filter-label">Max Area (sqft)</label>
+                        <input type="number" name="maxArea" class="filter-input" placeholder="Max Area" value="<%= locals.query?.maxArea || '' %>">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="filter-group">
+                        <label class="filter-label">Furnishing</label>
+                        <select name="furnishing" class="filter-select">
+                            <option value="">Any</option>
+                            <option value="unfurnished" <%= locals.query?.furnishing === 'unfurnished' ? 'selected' : '' %>>Unfurnished</option>
+                            <option value="semi-furnished" <%= locals.query?.furnishing === 'semi-furnished' ? 'selected' : '' %>>Semi-furnished</option>
+                            <option value="fully-furnished" <%= locals.query?.furnishing === 'fully-furnished' ? 'selected' : '' %>>Fully-furnished</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="filter-group">
+                        <label class="filter-label">Year Built</label>
+                        <input type="number" name="minYearBuilt" class="filter-input" placeholder="Min Year" value="<%= locals.query?.minYearBuilt || '' %>">
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="filter-group">
+                        <label class="filter-label">Additional Features</label>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label class="filter-checkbox-label">
+                                    <input type="checkbox" name="features" value="parking" class="filter-checkbox" <%= locals.query?.features?.includes('parking') ? 'checked' : '' %>>
+                                    Parking
+                                </label>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="filter-checkbox-label">
+                                    <input type="checkbox" name="features" value="garden" class="filter-checkbox" <%= locals.query?.features?.includes('garden') ? 'checked' : '' %>>
+                                    Garden
+                                </label>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="filter-checkbox-label">
+                                    <input type="checkbox" name="features" value="balcony" class="filter-checkbox" <%= locals.query?.features?.includes('balcony') ? 'checked' : '' %>>
+                                    Balcony
+                                </label>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="filter-checkbox-label">
+                                    <input type="checkbox" name="features" value="security" class="filter-checkbox" <%= locals.query?.features?.includes('security') ? 'checked' : '' %>>
+                                    Security
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <button type="submit" id="searchBtn" class="search-btn">Search Properties</button>
+                </div>
+                <div class="col-md-6">
+                    <button type="button" class="clear-btn" onclick="clearFilters()">Clear Filters</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <% if (locals.listings) { %>
+    <div class="results-section">
+        <div class="results-header">
+            <div class="results-count">
+                Found <%= listings.length %> properties
+            </div>
+            <div>
+                <select class="sort-select" onchange="sortResults(this.value)">
+                    <option value="relevance">Sort by Relevance</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="popular">Most Popular</option>
+                </select>
+            </div>
+        </div>
+
+        <% if (listings.length > 0) { %>
+        <div class="listing-grid">
+            <% listings.forEach(listing => { %>
+            <div class="listing-card" data-listing-id="<%= listing._id %>">
+                <% if (listing.featured) { %>
+                <div class="listing-badge">Featured</div>
+                <% } %>
+                
+                <!-- Special Owner Badge -->
+                <% if (listing.owner && listing.owner.isSpecialOwner) { %>
+                    <span class="special-owner-badge">
+                        <i class="fas fa-crown me-1"></i>
+                        Special Owner
+                    </span>
+                <% } %>
+                
+
+                
+                <img src="<%= listing.images && listing.images.length > 0 ? listing.images[0].url : '/images/default-property.jpg' %>" 
+                     alt="<%= listing.title %>" class="listing-image">
+                
+                <div class="listing-content">
+                    <h3 class="listing-title"><%= listing.title %></h3>
+                    
+                    <div class="listing-location">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <%= listing.address.city %>, <%= listing.address.state %>
+                    </div>
+                    
+                    <div class="listing-price">
+                        ₹<%= listing.price.amount.toLocaleString() %>
+                        <span style="font-size: 0.9rem; color: #7f8c8d;">
+                            <%= listing.listingType === 'rent' ? '/month' : '' %>
+                        </span>
+                    </div>
+                    
+                    <div class="listing-details">
+                        <span><i class="fas fa-bed"></i> <%= listing.bedrooms || 'N/A' %> Beds</span>
+                        <span><i class="fas fa-bath"></i> <%= listing.bathrooms || 'N/A' %> Baths</span>
+                        <span><i class="fas fa-ruler-combined"></i> <%= listing.area ? listing.area.size + ' ' + listing.area.unit : 'N/A' %></span>
+                    </div>
+                    
+                    <div class="listing-actions">
+                        <a href="/listings/<%= listing._id %>" class="btn-primary">View Details</a>
+                        <button class="favorite-btn <%= locals.user && locals.userFavorites && locals.userFavorites.includes(listing._id.toString()) ? 'favorited' : '' %>" 
+                                onclick="toggleFavorite('<%= listing._id %>')" 
+                                data-listing-id="<%= listing._id %>">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <% }); %>
+        </div>
+        <% } else { %>
+        <div class="no-results">
+            <h3>No properties found</h3>
+            <p>Try adjusting your search criteria or browse our featured properties.</p>
+            <a href="/listings" class="btn-primary">Browse All Properties</a>
+        </div>
+        <% } %>
+    </div>
+    <% } %>
+</div>
+
+<script>
+function clearFilters() {
+    const form = document.getElementById('searchForm');
+    if (form) form.reset();
+    // Trigger AJAX reload of results without full page navigation
+    if (form) form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+}
+
+function sortResults(sortBy) {
+    const urlParams = new URLSearchParams(window.location.search);
+    urlParams.set('sort', sortBy);
+    window.location.search = urlParams.toString();
+}
+
+async function toggleFavorite(listingId) {
+    try {
+        const response = await fetch('/favorites/toggle', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ listingId })
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            const btn = document.querySelector(`[data-listing-id="${listingId}"]`);
+            
+            if (result.isFavorited) {
+                btn.classList.add('favorited');
+                btn.innerHTML = '<i class="fas fa-heart"></i>';
+            } else {
+                btn.classList.remove('favorited');
+                btn.innerHTML = '<i class="far fa-heart"></i>';
+            }
+        }
+    } catch (error) {
+        console.error('Error toggling favorite:', error);
+    }
+}
+
+// Auto-submit form when filters change
+document.querySelectorAll('.filter-input, .filter-select').forEach(element => {
+    element.addEventListener('change', () => {
+        // Dispatch submit which the form handler intercepts and runs via AJAX
+        const form = document.getElementById('searchForm');
+        if (form) form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    });
+});
+</script>
+
+<script>
+// Ensure AJAX-based search submission is robust
+const searchForm = document.getElementById('searchForm');
+if (searchForm) {
+    searchForm.addEventListener('submit', async function(e) {
+        e.preventDefault(); // Prevent default navigation
+
+        const params = new URLSearchParams(new FormData(searchForm)).toString();
+        const url = '/listings/search' + (params ? ('?' + params) : '');
+
+        const resultsContainer = document.querySelector('.results-section');
+        if (resultsContainer) resultsContainer.innerHTML = '<p>Loading results...</p>';
+
+        try {
+            const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+            if (!res.ok) throw new Error('Network response not ok: ' + res.status);
+            const html = await res.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newResults = doc.querySelector('.results-section');
+            if (newResults) {
+                resultsContainer.replaceWith(newResults);
+            } else {
+                window.location.href = url; // Fallback to navigation if AJAX fails
+            }
+
+            window.history.pushState({}, '', url); // Update URL without reload
+        } catch (err) {
+            console.error('Search request failed', err);
+            if (resultsContainer) resultsContainer.innerHTML = '<p>Error loading results. Try again.</p>';
+        }
+    });
+}
+</script>
+
+<script>
+// Prefill form fields from URL params (defensive in case server-side locals didn't populate)
+document.addEventListener('DOMContentLoaded', function() {
+    const params = new URLSearchParams(window.location.search);
+    const location = params.get('location');
+    const propertyType = params.get('propertyType');
+    const listingType = params.get('listingType');
+
+    const form = document.getElementById('searchForm');
+    if (!form) return;
+
+    if (location) {
+        const el = form.querySelector('input[name="location"]');
+        if (el) el.value = location;
+    }
+    if (propertyType) {
+        const el = form.querySelector('select[name="propertyType"]');
+        if (el) el.value = propertyType;
+    }
+    if (listingType) {
+        const el = form.querySelector('select[name="listingType"]');
+        if (el) el.value = listingType;
+    }
+
+    // NOTE: removed auto-submit to avoid a submit/redirect loop when server-side rendering
+    // already handles the search. Users can click the Search button to submit additional filters.
+});
+</script>
+

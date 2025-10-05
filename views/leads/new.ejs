@@ -1,0 +1,234 @@
+<% layout('/layouts/boilerplate') %>
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h2 mb-1">Add New Lead</h1>
+                    <p class="text-muted mb-0">Create a new lead to track potential clients</p>
+                </div>
+                <div>
+                    <a href="/leads" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Leads
+                    </a>
+                </div>
+            </div>
+            <div class="card shadow border-0">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-user-plus me-2"></i>New Lead Information</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form action="/leads" method="POST" class="needs-validation" novalidate>
+                        <!-- Personal Information -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-3">
+                                    <i class="fas fa-user me-2"></i>Personal Information
+                                </h6>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="firstName" class="form-label">First Name *</label>
+                                    <input type="text" class="form-control" id="firstName" name="firstName" required>
+                                    <div class="invalid-feedback">Please provide a first name.</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="lastName" class="form-label">Last Name *</label>
+                                    <input type="text" class="form-control" id="lastName" name="lastName" required>
+                                    <div class="invalid-feedback">Please provide a last name.</div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Contact Information -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-3">
+                                    <i class="fas fa-address-book me-2"></i>Contact Information
+                                </h6>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email *</label>
+                                    <input type="email" class="form-control" id="email" name="email" required>
+                                    <div class="invalid-feedback">Please provide a valid email address.</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="phone" class="form-label">Phone Number *</label>
+                                    <input type="tel" class="form-control" id="phone" name="phone" required>
+                                    <div class="invalid-feedback">Please provide a phone number.</div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Property Interest -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-3">
+                                    <i class="fas fa-home me-2"></i>Property Interest
+                                </h6>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="interest" class="form-label">Interest Type *</label>
+                                    <select class="form-select" id="interest" name="interest" required>
+                                        <option value="">Select interest type</option>
+                                        <option value="buy">Buy</option>
+                                        <option value="rent">Rent</option>
+                                        <option value="sell">Sell</option>
+                                    </select>
+                                    <div class="invalid-feedback">Please select an interest type.</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="propertyType" class="form-label">Property Type</label>
+                                    <select class="form-select" id="propertyType" name="propertyType">
+                                        <option value="">Select property type</option>
+                                        <option value="apartment">Apartment</option>
+                                        <option value="house">House</option>
+                                        <option value="condo">Condo</option>
+                                        <option value="townhouse">Townhouse</option>
+                                        <option value="commercial">Commercial</option>
+                                        <option value="land">Land</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Budget and Timeline -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-3">
+                                    <i class="fas fa-dollar-sign me-2"></i>Budget & Timeline
+                                </h6>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="budget" class="form-label">Budget Range</label>
+                                    <select class="form-select" id="budget" name="budget">
+                                        <option value="">Select budget range</option>
+                                        <option value="under_100k">Under $100,000</option>
+                                        <option value="100k_200k">$100,000 - $200,000</option>
+                                        <option value="200k_300k">$200,000 - $300,000</option>
+                                        <option value="300k_500k">$300,000 - $500,000</option>
+                                        <option value="500k_750k">$500,000 - $750,000</option>
+                                        <option value="750k_1m">$750,000 - $1,000,000</option>
+                                        <option value="over_1m">Over $1,000,000</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="timeline" class="form-label">Timeline</label>
+                                    <select class="form-select" id="timeline" name="timeline">
+                                        <option value="">Select timeline</option>
+                                        <option value="immediate">Immediate (0-1 month)</option>
+                                        <option value="soon">Soon (1-3 months)</option>
+                                        <option value="flexible">Flexible (3-6 months)</option>
+                                        <option value="planning">Planning (6+ months)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Location Preferences -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-3">
+                                    <i class="fas fa-map-marker-alt me-2"></i>Location Preferences
+                                </h6>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="preferredLocation" class="form-label">Preferred Location</label>
+                                    <input type="text" class="form-control" id="preferredLocation" name="preferredLocation" placeholder="e.g., Downtown, Suburbs, Specific neighborhood">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="source" class="form-label">Lead Source</label>
+                                    <select class="form-select" id="source" name="source">
+                                        <option value="">Select source</option>
+                                        <option value="website">Website</option>
+                                        <option value="referral">Referral</option>
+                                        <option value="social_media">Social Media</option>
+                                        <option value="open_house">Open House</option>
+                                        <option value="cold_call">Cold Call</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Lead Management -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-3">
+                                    <i class="fas fa-cog me-2"></i>Lead Management
+                                </h6>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="priority" class="form-label">Priority *</label>
+                                    <select class="form-select" id="priority" name="priority" required>
+                                        <option value="">Select priority</option>
+                                        <option value="low">Low</option>
+                                        <option value="medium">Medium</option>
+                                        <option value="high">High</option>
+                                    </select>
+                                    <div class="invalid-feedback">Please select a priority level.</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="status" class="form-label">Status *</label>
+                                    <select class="form-select" id="status" name="status" required>
+                                        <option value="new">New</option>
+                                        <option value="contacted">Contacted</option>
+                                        <option value="qualified">Qualified</option>
+                                        <option value="proposal_sent">Proposal Sent</option>
+                                        <option value="negotiation">Negotiation</option>
+                                        <option value="closed">Closed</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Notes -->
+                        <div class="mb-4">
+                            <label for="notes" class="form-label">Initial Notes</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="4" placeholder="Add any initial notes about this lead..."></textarea>
+                        </div>
+                        <!-- Submit Buttons -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="button" class="btn btn-outline-secondary me-md-2" onclick="history.back()">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Create Lead
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Form validation
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+</script>

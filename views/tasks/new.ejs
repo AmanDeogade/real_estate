@@ -1,0 +1,171 @@
+<% layout("/layouts/boilerplate") %>
+
+<style>
+    .form-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .form-section {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-section h5 {
+        color: #495057;
+        margin-bottom: 1rem;
+        border-bottom: 2px solid #dee2e6;
+        padding-bottom: 0.5rem;
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="form-container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Create New Task</h2>
+            <a href="/tasks" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Tasks
+            </a>
+        </div>
+        
+    <form action="/tasks" method="POST" class="needs-validation" novalidate>
+            <!-- Basic Task Information -->
+            <div class="form-section">
+                <h5><i class="fas fa-info-circle me-2"></i>Task Details</h5>
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Task Title *</label>
+                            <input type="text" class="form-control" id="title" name="title" required value="<%= prefill && prefill.title ? prefill.title : '' %>">
+                            <div class="invalid-feedback">Please provide a task title.</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="type" class="form-label">Task Type *</label>
+                            <select class="form-select" id="type" name="type" required>
+                                <option value="">Select Type</option>
+                                <option value="follow_up" <%= prefill && prefill.type === 'follow_up' ? 'selected' : '' %>>Follow Up</option>
+                                <option value="property_viewing" <%= prefill && prefill.type === 'property_viewing' ? 'selected' : '' %>>Property Viewing</option>
+                                <option value="documentation">Documentation</option>
+                                <option value="negotiation">Negotiation</option>
+                                <option value="closing">Closing</option>
+                                <option value="other">Other</option>
+                            </select>
+                            <div class="invalid-feedback">Please select a task type.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="3" placeholder="Describe what needs to be done..."></textarea>
+                </div>
+            </div>
+            
+            <!-- Priority and Due Date -->
+            <div class="form-section">
+                <h5><i class="fas fa-calendar-alt me-2"></i>Priority & Timeline</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="priority" class="form-label">Priority *</label>
+                            <select class="form-select" id="priority" name="priority" required>
+                                <option value="">Select Priority</option>
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                                <option value="urgent">Urgent</option>
+                            </select>
+                            <div class="invalid-feedback">Please select a priority level.</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="dueDate" class="form-label">Due Date *</label>
+                            <input type="date" class="form-control" id="dueDate" name="dueDate" required value="<%= prefill && prefill.dueDate ? prefill.dueDate : '' %>">
+                            <div class="invalid-feedback">Please select a due date.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Related Information -->
+            <div class="form-section">
+                <h5><i class="fas fa-link me-2"></i>Related Information</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="relatedLead" class="form-label">Related Lead</label>
+                            <select class="form-select" id="relatedLead" name="relatedLead">
+                                <option value="">Select Lead (Optional)</option>
+                                <% if (leads && leads.length > 0) { %>
+                                    <% leads.forEach(lead => { %>
+                                        <option value="<%= lead._id %>" <%= prefill && prefill.relatedLead && prefill.relatedLead.toString() === lead._id.toString() ? 'selected' : '' %>>
+                                            <%= lead.firstName %> <%= lead.lastName %> - <%= lead.email %>
+                                        </option>
+                                    <% }) %>
+                                <% } %>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="relatedProperty" class="form-label">Related Property</label>
+                            <input type="text" class="form-control" id="relatedProperty" name="relatedProperty" placeholder="Property ID or address">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="notes" class="form-label">Additional Notes</label>
+                    <textarea class="form-control" id="notes" name="notes" rows="2" placeholder="Any additional information..."></textarea>
+                </div>
+            </div>
+            
+            <!-- Submit Buttons -->
+            <div class="d-flex gap-3 justify-content-end">
+                <a href="/tasks" class="btn btn-outline-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-2"></i>Create Task
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Form validation
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+
+// Set minimum date to today
+const dueEl = document.getElementById('dueDate');
+if (dueEl) {
+    dueEl.min = new Date().toISOString().split('T')[0];
+}
+
+// If server provided a prefill dueDate, ensure it's not below min
+if (dueEl && dueEl.value) {
+    const min = new Date(dueEl.min);
+    const val = new Date(dueEl.value);
+    if (val < min) {
+        dueEl.value = dueEl.min;
+    }
+}
+</script>

@@ -8,6 +8,7 @@
     justify-content: center;
     padding-inline: 1rem;
   }
+
   .search-btn:hover {
     background-color: #fe424d;
     color: #fff;
@@ -23,31 +24,148 @@
     padding: 0.5rem 3rem;
     font-size: 1rem;
   }
+
+  .user-type-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-weight: 500;
+  }
+
+  .badge-buyer { background-color: #e3f2fd; color: #1976d2; }
+  .badge-owner { background-color: #f3e5f5; color: #7b1fa2; }
+  .badge-broker { background-color: #e8f5e8; color: #388e3c; }
 </style>
 
 <nav class="navbar navbar-expand-md bg-body-light border-bottom sticky-top">
   <div class="container-fluid">
-    <a class="navbar-brand" href="/listings"><i class="fa-regular fa-compass"></i></a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup">
+    <a class="navbar-brand" href="/listings">
+      <i class="fa-solid fa-building"></i> Karnavat & Associates
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
+      aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
       <div class="navbar-nav">
-        <a class="nav-link" href="/listings">Explore</a>
+    <a class="nav-link" href="/listings">Properties</a>
+  <a class="nav-link scroll-to-search" href="/listings#searchSection">Search</a>
+        <% if (currUser && currUser.userType === 'buyer') { %>
+          <a class="nav-link" href="/favorites">Favorites</a>
+          <a class="nav-link" href="/recommendations/personalized">Recommendations</a>
+        <% } %>
+        <% if (currUser && currUser.userType === 'property_owner') { %>
+          <a class="nav-link" href="/listings/new">Add Property</a>
+          <a class="nav-link" href="/payment/special-owner">
+            <i class="fa-solid fa-crown text-warning"></i> Special Owner
+          </a>
+        <% } %>
+        <% if (currUser && currUser.userType === 'broker') { %>
+          <a class="nav-link" href="/leads">Leads</a>
+          <a class="nav-link" href="/tasks">Tasks</a>
+          <a class="nav-link" href="/listings/broker-dashboard">CRM Dashboard</a>
+        <% } %>
       </div>
-      <!-- <div class="navbar-nav ms-auto">
-        <form class="d-flex" role="search">
-          <input class="form-control me-2 search-inp" type="search" placeholder="Search destinations">
+      <div class="navbar-nav ms-auto">
+        <form id="navSearchForm" class="d-flex me-3" role="search" action="/listings/search" method="GET">
+          <input class="form-control me-2 search-inp" type="search" name="q" placeholder="Search properties, locations..."
+            aria-label="Search">
           <button class="btn search-btn" type="submit"><i class="fa-solid fa-magnifying-glass"></i>Search</button>
         </form>
-      </div> -->
-      <div class="navbar-nav ms-auto">
-        <a class="nav-link" href="/listings/new">Rent Home</a>
-        <% if(!currUser) { %>
-        <a class="nav-link" href="/signup"><b>Sign Up</b></a>
-        <a class="nav-link" href="/login"><b>Login</b></a>
+
+        <script>
+          // Make the navbar "Search" link and form behave like the home 'Search Properties' action.
+          (function() {
+            // Smooth-scroll behavior when already on /listings
+            function scrollToSearchSection() {
+              const target = document.getElementById('searchSection');
+              if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                const input = target.querySelector('input, select, textarea');
+                if (input) { input.focus(); try { input.style.outline = '3px solid rgba(102,126,234,0.25)'; setTimeout(() => input.style.outline = '', 1200); } catch(e){} }
+                return true;
+              }
+              return false;
+            }
+
+            // Attach click handler to any .scroll-to-search link in the navbar
+            document.querySelectorAll('.scroll-to-search').forEach(el => {
+              el.addEventListener('click', function(e) {
+                // If we're already on listings page, do smooth scroll and prevent navigation
+                if (window.location.pathname === '/listings' || window.location.pathname === '/listings/') {
+                  e.preventDefault();
+                  scrollToSearchSection();
+                  return;
+                }
+                // Otherwise, allow the link to navigate to /listings#searchSection so the target is visible after navigation
+              });
+            });
+
+            // Intercept navbar search form submit so we navigate to listings and include the #searchSection fragment.
+            const navForm = document.getElementById('navSearchForm');
+            if (navForm) {
+              navForm.addEventListener('submit', function(e) {
+                // Build query string from form inputs
+                const params = new URLSearchParams(new FormData(navForm)).toString();
+                const base = navForm.getAttribute('action') || '/listings/search';
+                const url = base + (params ? ('?' + params) : '') + '#searchSection';
+
+                // If we're already on listings, just update the hash and let any in-page handlers run
+                if (window.location.pathname === '/listings' || window.location.pathname === '/listings/') {
+                  e.preventDefault();
+                  // If there's a query, attempt to submit via fetch to the search endpoint and replace results-section
+                  if (params) {
+                    // navigate to /listings/search?params which renders the index view server-side
+                    window.location.href = '/listings/search' + (params ? ('?' + params) : '') + '#searchSection';
+                  } else {
+                    // just scroll to the section
+                    scrollToSearchSection();
+                  }
+                  return;
+                }
+
+                // Not on listings: let the browser navigate to the constructed URL (includes #searchSection)
+                // But prevent the default form submission and perform a location replace to ensure fragment is applied
+                e.preventDefault();
+                window.location.href = url;
+              });
+            }
+          })();
+        </script>
+        
+        <% if (!currUser) { %>
+          <a class="nav-link" href="/signup"><b>Sign Up</b></a>
+          <a class="nav-link" href="/login"><b>Login</b></a>
         <% } else { %>
-        <a class="nav-link" href="/logout"><b>Logout</b></a>
+          <div class="dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fa-solid fa-user"></i>
+              <%= currUser.firstName || currUser.username %>
+              <span class="user-type-badge badge-<%= currUser.userType %>">
+                <%= currUser.userType === 'buyer' ? 'Buyer' : 
+                    currUser.userType === 'property_owner' ? 'Owner' : 'Broker' %>
+              </span>
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="/profile">Profile</a></li>
+              <% if (currUser.userType === 'buyer') { %>
+                <li><a class="dropdown-item" href="/favorites">My Favorites</a></li>
+                <li><a class="dropdown-item" href="/recommendations/personalized">Recommendations</a></li>
+              <% } %>
+              <% if (currUser && currUser.userType === 'property_owner') { %>
+                <li><a class="dropdown-item" href="/payment/special-owner">
+                  <i class="fa-solid fa-crown text-warning me-2"></i>Special Owner
+                </a></li>
+              <% } %>
+              <% if (currUser.userType === 'broker') { %>
+                <li><a class="dropdown-item" href="/listings/broker-dashboard">CRM Dashboard</a></li>
+                <li><a class="dropdown-item" href="/leads">All Leads</a></li>
+                <li><a class="dropdown-item" href="/tasks">All Tasks</a></li>
+              <% } %>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="/logout">Logout</a></li>
+            </ul>
+          </div>
         <% } %>
       </div>
     </div>

@@ -1,0 +1,231 @@
+<% layout("/layouts/boilerplate") %>
+
+<style>
+    .filter-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        color: white;
+    }
+
+    .filter-summary {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 1rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+    }
+
+    .listing-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        margin-bottom: 1.5rem;
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .listing-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    .listing-image {
+        height: 250px;
+        object-fit: cover;
+        width: 100%;
+    }
+
+    .listing-badge {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: #ff6b6b;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .special-owner-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: linear-gradient(135deg, #ffd700, #ffed4e);
+        color: #8b6914;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+        z-index: 10;
+    }
+
+    .price-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1rem;
+    }
+
+    .price {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #2c3e50;
+    }
+
+    .price-unit {
+        font-size: 0.9rem;
+        color: #7f8c8d;
+    }
+
+    .property-details {
+        display: flex;
+        gap: 1rem;
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+        color: #7f8c8d;
+    }
+
+    .no-results {
+        text-align: center;
+        padding: 3rem;
+        color: #7f8c8d;
+    }
+
+    .back-link {
+        display: inline-block;
+        margin-bottom: 2rem;
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .back-link:hover {
+        color: #5a6fd8;
+    }
+
+    .filter-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin: 1rem 0;
+    }
+
+    .filter-tag {
+        background: #e3f2fd;
+        color: #1976d2;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+</style>
+
+<!-- Filter Header -->
+<div class="filter-header">
+    <div class="container">
+        <h2 class="text-center mb-4">Filtered Properties</h2>
+        <div class="filter-summary">
+            <h5>Applied Filters:</h5>
+            <div class="filter-tags">
+                <% if (filterParams.bedrooms) { %>
+                    <span class="filter-tag">
+                        <i class="fas fa-bed"></i> <%= filterParams.bedrooms %>+ Bedrooms
+                    </span>
+                <% } %>
+                <% if (filterParams.bathrooms) { %>
+                    <span class="filter-tag">
+                        <i class="fas fa-bath"></i> <%= filterParams.bathrooms %>+ Bathrooms
+                    </span>
+                <% } %>
+                <% if (filterParams.minArea) { %>
+                    <span class="filter-tag">
+                        <i class="fas fa-ruler-combined"></i> Min: <%= filterParams.minArea %> sqft
+                    </span>
+                <% } %>
+                <% if (filterParams.maxArea) { %>
+                    <span class="filter-tag">
+                        <i class="fas fa-ruler-combined"></i> Max: <%= filterParams.maxArea %> sqft
+                    </span>
+                <% } %>
+                <% if (filterParams.furnishing) { %>
+                    <span class="filter-tag">
+                        <i class="fas fa-couch"></i> <%= filterParams.furnishing.charAt(0).toUpperCase() + filterParams.furnishing.slice(1) %>
+                    </span>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <a href="/listings" class="back-link">
+        <i class="fas fa-arrow-left"></i> Back to All Properties
+    </a>
+
+    <% if (listings && listings.length > 0) { %>
+        <h4 class="mb-4">Found <%= listings.length %> properties matching your criteria</h4>
+        
+        <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1">
+            <% for(let listing of listings) { %>
+                <div class="col">
+                    <a href="/listings/<%= listing._id %>" class="listing-link text-decoration-none">
+                        <div class="card listing-card">
+                            <% if (listing.images && listing.images.length > 0) { %>
+                                <img src="<%= listing.images[0].url %>" class="listing-image" alt="<%= listing.title %>">
+                            <% } else { %>
+                                <img src="https://via.placeholder.com/400x250?text=No+Image" class="listing-image" alt="No Image">
+                            <% } %>
+                            <% if (listing.status === 'under_offer') { %>
+                                <div class="listing-badge" style="background: #f39c12;">Under Offer</div>
+                            <% } %>
+                            <% if (listing.featured) { %>
+                                <div class="listing-badge">Featured</div>
+                            <% } %>
+                            
+                            <!-- Special Owner Badge -->
+                            <% if (listing.owner && listing.owner.isSpecialOwner) { %>
+                                <span class="special-owner-badge">
+                                    <i class="fas fa-crown me-1"></i>
+                                    Special Owner
+                                </span>
+                                <% } %>
+                            
+
+                            <div class="card-body">
+                                <h5 class="card-title"><%= listing.title %></h5>
+                                <p class="card-text text-muted">
+                                    <%= listing.address?.street %>, <%= listing.address?.city %>, <%= listing.address?.state %>
+                                </p>
+                                <div class="price-section">
+                                    <span class="price">₹<%= listing.price.amount.toLocaleString("en-IN") %></span>
+                                    <span class="price-unit"><%= listing.listingType === 'rent' ? '/month' : '' %></span>
+                                </div>
+                                <div class="property-details">
+                                    <% if (listing.bedrooms) { %>
+                                        <span><i class="fas fa-bed"></i> <%= listing.bedrooms %> Beds</span>
+                                    <% } %>
+                                    <% if (listing.bathrooms) { %>
+                                        <span><i class="fas fa-bath"></i> <%= listing.bathrooms %> Baths</span>
+                                    <% } %>
+                                    <% if (listing.area?.size) { %>
+                                        <span><i class="fas fa-ruler-combined"></i> <%= listing.area.size %> <%= listing.area.unit %></span>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            <% } %>
+        </div>
+    <% } else { %>
+        <div class="no-results">
+            <i class="fas fa-filter fa-3x mb-3"></i>
+            <h4>No properties found</h4>
+            <p>No properties match your current filter criteria. Try adjusting your filters or browse all available properties.</p>
+            <a href="/listings" class="btn btn-primary">Browse All Properties</a>
+        </div>
+    <% } %>
+</div>
+

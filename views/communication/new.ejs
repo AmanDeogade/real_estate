@@ -1,0 +1,604 @@
+<% layout("/layouts/boilerplate") %>
+
+<style>
+    .communication-hero {
+        background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+        padding: 3rem 0;
+        color: white;
+        margin-bottom: 2rem;
+    }
+
+    .communication-form {
+        background: white;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #e1e8ed;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #27ae60;
+        box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
+    }
+
+    .form-select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #e1e8ed;
+        border-radius: 8px;
+        font-size: 1rem;
+        background: white;
+        cursor: pointer;
+    }
+
+    .form-select:focus {
+        outline: none;
+        border-color: #27ae60;
+    }
+
+    .textarea {
+        min-height: 150px;
+        resize: vertical;
+    }
+
+    .communication-methods {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+    }
+
+    .method-option {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        background: white;
+        border-radius: 8px;
+        border: 2px solid #e1e8ed;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .method-option:hover {
+        border-color: #27ae60;
+        transform: translateY(-2px);
+    }
+
+    .method-option.selected {
+        border-color: #27ae60;
+        background: #e8f5e8;
+    }
+
+    .method-radio {
+        margin-right: 1rem;
+    }
+
+    .method-icon {
+        font-size: 1.5rem;
+        margin-right: 1rem;
+        width: 30px;
+        text-align: center;
+    }
+
+    .method-info h5 {
+        margin: 0;
+        color: #2c3e50;
+    }
+
+    .method-info p {
+        margin: 0;
+        color: #7f8c8d;
+        font-size: 0.9rem;
+    }
+
+    .send-btn {
+        background: #27ae60;
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 25px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+
+    .send-btn:hover {
+        background: #229954;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+    }
+
+    .send-btn:disabled {
+        background: #95a5a6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .preview-section {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-top: 2rem;
+        display: none;
+    }
+
+    .preview-header {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e1e8ed;
+    }
+
+    .preview-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin: 0;
+    }
+
+    .preview-toggle {
+        background: #27ae60;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        cursor: pointer;
+    }
+
+    .preview-content {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        border: 1px solid #e1e8ed;
+    }
+
+    .preview-field {
+        margin-bottom: 1rem;
+    }
+
+    .preview-label {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.25rem;
+        display: block;
+    }
+
+    .preview-value {
+        color: #7f8c8d;
+        padding: 0.5rem;
+        background: #f8f9fa;
+        border-radius: 4px;
+    }
+
+    .templates-section {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+    }
+
+    .template-option {
+        background: white;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        border: 2px solid #e1e8ed;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .template-option:hover {
+        border-color: #27ae60;
+        transform: translateY(-2px);
+    }
+
+    .template-title {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+
+    .template-description {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .template-preview {
+        color: #2c3e50;
+        font-style: italic;
+        font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+        .communication-form {
+            padding: 1rem;
+        }
+        
+        .method-option {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .method-icon {
+            margin-right: 0;
+            margin-bottom: 0.5rem;
+        }
+    }
+</style>
+
+<div class="communication-hero">
+    <div class="container">
+        <h1 class="text-center mb-4">Send Message</h1>
+        <p class="text-center mb-4">Communicate with buyers through multiple channels</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="communication-form">
+        <form id="communicationForm">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">Recipient</label>
+                        <select class="form-select" name="receiver" id="receiver" required>
+                            <option value="">Select recipient...</option>
+                            <% if (locals.buyerId && locals.buyer) { %>
+                                <option value="<%= locals.buyer._id %>" selected>
+                                    <%= locals.buyer.firstName %> <%= locals.buyer.lastName %> (Buyer)
+                                </option>
+                            <% } %>
+                            <% if (locals.buyers) { %>
+                                <% locals.buyers.forEach(buyer => { %>
+                                    <option value="<%= buyer._id %>">
+                                        <%= buyer.firstName %> <%= buyer.lastName %> (Buyer)
+                                    </option>
+                                <% }); %>
+                            <% } %>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">Communication Type</label>
+                        <select class="form-select" name="type" id="type" required>
+                            <option value="">Select type...</option>
+                            <option value="email">Email</option>
+                            <option value="sms">SMS</option>
+                            <option value="web_app">Web App Message</option>
+                            <option value="phone_call">Phone Call</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">Subject</label>
+                        <input type="text" class="form-control" name="subject" id="subject" placeholder="Enter subject..." required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">Priority</label>
+                        <select class="form-select" name="priority" id="priority">
+                            <option value="normal">Normal</option>
+                            <option value="high">High</option>
+                            <option value="urgent">Urgent</option>
+                            <option value="low">Low</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Message</label>
+                <textarea class="form-control textarea" name="message" id="message" placeholder="Enter your message..." required></textarea>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">Related Property (Optional)</label>
+                        <select class="form-select" name="relatedProperty" id="relatedProperty">
+                            <option value="">Select property...</option>
+                            <% if (locals.properties) { %>
+                                <% locals.properties.forEach(property => { %>
+                                    <option value="<%= property._id %>">
+                                        <%= property.title %> - ₹<%= property.price.amount.toLocaleString() %>
+                                    </option>
+                                <% }); %>
+                            <% } %>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">Tags</label>
+                        <input type="text" class="form-control" name="tags" id="tags" placeholder="Enter tags separated by commas...">
+                    </div>
+                </div>
+            </div>
+
+            <div class="communication-methods">
+                <h5>Communication Methods</h5>
+                <p class="text-muted">Select how you want to send this message:</p>
+                
+                <div class="method-option" onclick="selectMethod('email')">
+                    <input type="radio" name="method" value="email" class="method-radio" checked>
+                    <div class="method-icon">📧</div>
+                    <div class="method-info">
+                        <h5>Email</h5>
+                        <p>Send via email with rich formatting</p>
+                    </div>
+                </div>
+                
+                <div class="method-option" onclick="selectMethod('sms')">
+                    <input type="radio" name="method" value="sms" class="method-radio">
+                    <div class="method-icon">📱</div>
+                    <div class="method-info">
+                        <h5>SMS</h5>
+                        <p>Send text message to phone</p>
+                    </div>
+                </div>
+                
+                <div class="method-option" onclick="selectMethod('web_app')">
+                    <input type="radio" name="method" value="web_app" class="method-radio">
+                    <div class="method-icon">💻</div>
+                    <div class="method-info">
+                        <h5>Web App</h5>
+                        <p>In-app notification</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="templates-section">
+                <h5>Message Templates</h5>
+                <p class="text-muted">Use pre-written templates to save time:</p>
+                
+                <div class="template-option" onclick="useTemplate('property_inquiry')">
+                    <div class="template-title">Property Inquiry Follow-up</div>
+                    <div class="template-description">Follow up on property interest</div>
+                    <div class="template-preview">Hi [Name], I noticed you were interested in [Property]...</div>
+                </div>
+                
+                <div class="template-option" onclick="useTemplate('schedule_viewing')">
+                    <div class="template-title">Schedule Property Viewing</div>
+                    <div class="template-description">Arrange property viewing appointment</div>
+                    <div class="template-preview">Hi [Name], I'd love to show you [Property] in person...</div>
+                </div>
+                
+                <div class="template-option" onclick="useTemplate('price_update')">
+                    <div class="template-title">Price Update</div>
+                    <div class="template-description">Notify about price changes</div>
+                    <div class="template-preview">Hi [Name], I wanted to let you know about a price update...</div>
+                </div>
+            </div>
+
+            <button type="submit" class="send-btn" id="sendBtn">
+                <i class="fas fa-paper-plane"></i> Send Message
+            </button>
+        </form>
+    </div>
+
+    <div class="preview-section" id="previewSection">
+        <div class="preview-header">
+            <h5 class="preview-title">Message Preview</h5>
+            <button class="preview-toggle" onclick="togglePreview()">Hide Preview</button>
+        </div>
+        <div class="preview-content" id="previewContent">
+            <!-- Preview content will be populated here -->
+        </div>
+    </div>
+</div>
+
+<script>
+function selectMethod(method) {
+    // Update radio button selection
+    document.querySelector(`input[value="${method}"]`).checked = true;
+    
+    // Update visual selection
+    document.querySelectorAll('.method-option').forEach(option => {
+        option.classList.remove('selected');
+    });
+    event.currentTarget.classList.add('selected');
+}
+
+function useTemplate(templateType) {
+    const templates = {
+        property_inquiry: {
+            subject: 'Property Inquiry Follow-up',
+            message: `Hi [Name],
+
+I noticed you were interested in [Property] and wanted to follow up with you. 
+
+This property offers:
+• [Key Feature 1]
+• [Key Feature 2]
+• [Key Feature 3]
+
+Would you like me to:
+• Schedule a viewing?
+• Send more details?
+• Discuss financing options?
+
+Please let me know how I can help you further.
+
+Best regards,
+[Your Name]`
+        },
+        schedule_viewing: {
+            subject: 'Schedule Property Viewing',
+            message: `Hi [Name],
+
+I'd love to show you [Property] in person! This is a great opportunity to see all the features and get a feel for the space.
+
+Available viewing times this week:
+• [Date 1] at [Time 1]
+• [Date 2] at [Time 2]
+• [Date 3] at [Time 3]
+
+Please let me know which time works best for you, or if you'd prefer a different time.
+
+I can also arrange a virtual tour if that's more convenient.
+
+Looking forward to showing you this amazing property!
+
+Best regards,
+[Your Name]`
+        },
+        price_update: {
+            subject: 'Price Update - [Property]',
+            message: `Hi [Name],
+
+I wanted to let you know about a price update for [Property].
+
+Previous Price: ₹[Old Price]
+New Price: ₹[New Price]
+Change: [Increase/Decrease] of ₹[Amount]
+
+This change reflects:
+• [Reason 1]
+• [Reason 2]
+
+This is still an excellent value for the property and location. Would you like me to:
+• Schedule a viewing to see the property?
+• Discuss the current market conditions?
+• Explore similar properties in your budget?
+
+Please let me know if you have any questions!
+
+Best regards,
+[Your Name]`
+        }
+    };
+
+    const template = templates[templateType];
+    if (template) {
+        document.getElementById('subject').value = template.subject;
+        document.getElementById('message').value = template.message;
+        
+        // Update preview
+        updatePreview();
+    }
+}
+
+function updatePreview() {
+    const previewContent = document.getElementById('previewContent');
+    const subject = document.getElementById('subject').value;
+    const message = document.getElementById('message').value;
+    const type = document.getElementById('type').value;
+    const priority = document.getElementById('priority').value;
+    
+    previewContent.innerHTML = `
+        <div class="preview-field">
+            <div class="preview-label">Subject:</div>
+            <div class="preview-value">${subject || 'Not specified'}</div>
+        </div>
+        <div class="preview-field">
+            <div class="preview-label">Type:</div>
+            <div class="preview-value">${type || 'Not specified'}</div>
+        </div>
+        <div class="preview-field">
+            <div class="preview-label">Priority:</div>
+            <div class="preview-value">${priority || 'Normal'}</div>
+        </div>
+        <div class="preview-field">
+            <div class="preview-label">Message:</div>
+            <div class="preview-value" style="white-space: pre-wrap;">${message || 'No message'}</div>
+        </div>
+    `;
+}
+
+function togglePreview() {
+    const previewSection = document.getElementById('previewSection');
+    const toggleBtn = document.querySelector('.preview-toggle');
+    
+    if (previewSection.style.display === 'none') {
+        previewSection.style.display = 'block';
+        toggleBtn.textContent = 'Hide Preview';
+        updatePreview();
+    } else {
+        previewSection.style.display = 'none';
+        toggleBtn.textContent = 'Show Preview';
+    }
+}
+
+// Update preview when form fields change
+document.querySelectorAll('#subject, #message, #type, #priority').forEach(field => {
+    field.addEventListener('input', updatePreview);
+    field.addEventListener('change', updatePreview);
+});
+
+// Form submission
+document.getElementById('communicationForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const sendBtn = document.getElementById('sendBtn');
+    const originalText = sendBtn.innerHTML;
+    
+    sendBtn.disabled = true;
+    sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+    
+    try {
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData.entries());
+        
+        const response = await fetch('/communication/send', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            alert('Message sent successfully!');
+            window.location.href = '/communication';
+        } else {
+            const error = await response.json();
+            alert('Error: ' + error.message);
+        }
+    } catch (error) {
+        console.error('Error sending message:', error);
+        alert('Error sending message');
+    } finally {
+        sendBtn.disabled = false;
+        sendBtn.innerHTML = originalText;
+    }
+});
+
+// Initialize preview
+updatePreview();
+</script>
+
+

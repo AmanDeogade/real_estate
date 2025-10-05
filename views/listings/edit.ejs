@@ -1,46 +1,307 @@
 <% layout("/layouts/boilerplate") %>
-<div class="row mt-3">
-    <div class="col-8 offset-2">
-        <h3 class="my-3">Edit Your Listing</h3>
-        <form method="POST" action="/listings/<%= listing._id %>?_method=PUT" novalidate class="needs-validation" enctype="multipart/form-data">
-            <div class="mb-3">
-                <label for="title" class="form-label">Title</label>
-                <input name="listing[title]" value="<%= listing.title %>" type="text" class="form-control" required>
-                <div class="valid-feedback">Title looks good!</div>
-            </div>
-            <div class="mb-3">
-                <label for="title" class="form-label">Description</label>
-                <textarea name="listing[description]" class="form-control" required><%= listing.description %></textarea>
-                <div class="invalid-feedback">Please enter a short description</div>
-            </div>
-            
-            <div class="mb-3">
-                Original Listing Image <br>
-                <img src="<%= originalImageUrl %>">
-            </div>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-10 offset-lg-1">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-edit me-2"></i>Edit Property Listing
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="/listings/<%= listing._id %>?_method=PUT" novalidate class="needs-validation" enctype="multipart/form-data">
+                        
+                        <!-- Basic Information Section -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">
+                                    <i class="fas fa-info-circle me-2"></i>Basic Information
+                                </h5>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="title" class="form-label">Property Title *</label>
+                                <input name="listing[title]" value="<%= listing.title %>" type="text" class="form-control" required>
+                                <div class="invalid-feedback">Please provide a property title</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="propertyType" class="form-label">Property Type *</label>
+                                <select name="listing[propertyType]" class="form-select" required>
+                                    <option value="">Select Property Type</option>
+                                    <option value="apartment" <%= listing.propertyType === 'apartment' ? 'selected' : '' %>>Apartment</option>
+                                    <option value="house" <%= listing.propertyType === 'house' ? 'selected' : '' %>>House</option>
+                                    <option value="villa" <%= listing.propertyType === 'villa' ? 'selected' : '' %>>Villa</option>
+                                    <option value="commercial" <%= listing.propertyType === 'commercial' ? 'selected' : '' %>>Commercial</option>
+                                    <option value="land" <%= listing.propertyType === 'land' ? 'selected' : '' %>>Land</option>
+                                    <option value="office" <%= listing.propertyType === 'office' ? 'selected' : '' %>>Office</option>
+                                    <option value="shop" <%= listing.propertyType === 'shop' ? 'selected' : '' %>>Shop</option>
+                                </select>
+                                <div class="invalid-feedback">Please select a property type</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="listingType" class="form-label">Listing Type *</label>
+                                <select name="listing[listingType]" class="form-select" required>
+                                    <option value="">Select Listing Type</option>
+                                    <option value="sale" <%= listing.listingType === 'sale' ? 'selected' : '' %>>For Sale</option>
+                                    <option value="rent" <%= listing.listingType === 'rent' ? 'selected' : '' %>>For Rent</option>
+                                </select>
+                                <div class="invalid-feedback">Please select a listing type</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="status" class="form-label">Status</label>
+                                <select name="listing[status]" class="form-select">
+                                    <option value="active" <%= listing.status === 'active' ? 'selected' : '' %>>Active</option>
+                                    <option value="under_offer" <%= listing.status === 'under_offer' ? 'selected' : '' %>>Under Offer</option>
+                                    <option value="sold" <%= listing.status === 'sold' ? 'selected' : '' %>>Sold</option>
+                                    <option value="rented" <%= listing.status === 'rented' ? 'selected' : '' %>>Rented</option>
+                                    <option value="inactive" <%= listing.status === 'inactive' ? 'selected' : '' %>>Inactive</option>
+                                </select>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label for="description" class="form-label">Description *</label>
+                                <textarea name="listing[description]" class="form-control" rows="4" required><%= listing.description %></textarea>
+                                <div class="invalid-feedback">Please provide a property description</div>
+                            </div>
+                        </div>
 
-            <div class="mb-3">
-                <label for="image" class="form-label">Upload New Image</label>
-                <input name="listing[image]" type="file" class="form-control">
-            </div>
-            <div class="row">
-                <div class="mb-3 col-md-4">
-                    <label for="price" class="form-label">Price</label>
-                    <input name="listing[price]" value="<%= listing.price %>" type="number" class="form-control" required>
-                    <div class="invalid-feedback">Price should be valid</div>
+                        <!-- Pricing Section -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">
+                                    <i class="fas fa-tag me-2"></i>Pricing
+                                </h5>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="price" class="form-label">Price (₹) *</label>
+                                <input name="listing[price][amount]" value="<%= listing.price && listing.price.amount ? listing.price.amount : '' %>" type="number" class="form-control" min="0" step="1000" required>
+                                <div class="invalid-feedback">Please provide a valid price</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="currency" class="form-label">Currency</label>
+                                <select name="listing[price][currency]" class="form-select">
+                                    <option value="INR" <%= listing.price && listing.price.currency === 'INR' ? 'selected' : '' %>>INR (₹)</option>
+                                    <option value="USD" <%= listing.price && listing.price.currency === 'USD' ? 'selected' : '' %>>USD ($)</option>
+                                    <option value="EUR" <%= listing.price && listing.price.currency === 'EUR' ? 'selected' : '' %>>EUR (€)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="negotiable" class="form-label">Price Negotiable</label>
+                                <select name="listing[price][negotiable]" class="form-select">
+                                    <option value="false" <%= listing.price && listing.price.negotiable === false ? 'selected' : '' %>>No</option>
+                                    <option value="true" <%= listing.price && listing.price.negotiable === true ? 'selected' : '' %>>Yes</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Property Details Section -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">
+                                    <i class="fas fa-home me-2"></i>Property Details
+                                </h5>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="bedrooms" class="form-label">Bedrooms</label>
+                                <input name="listing[bedrooms]" value="<%= listing.bedrooms || '' %>" type="number" class="form-control" min="0" max="20">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="bathrooms" class="form-label">Bathrooms</label>
+                                <input name="listing[bathrooms]" value="<%= listing.bathrooms || '' %>" type="number" class="form-control" min="0" max="20">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="area" class="form-label">Area</label>
+                                <input name="listing[area][size]" value="<%= listing.area && listing.area.size ? listing.area.size : '' %>" type="number" class="form-control" min="0">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="areaUnit" class="form-label">Area Unit</label>
+                                <select name="listing[area][unit]" class="form-select">
+                                    <option value="sqft" <%= listing.area && listing.area.unit === 'sqft' ? 'selected' : '' %>>Square Feet</option>
+                                    <option value="sqm" <%= listing.area && listing.area.unit === 'sqm' ? 'selected' : '' %>>Square Meters</option>
+                                    <option value="acres" <%= listing.area && listing.area.unit === 'acres' ? 'selected' : '' %>>Acres</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="furnishing" class="form-label">Furnishing</label>
+                                <select name="listing[furnishing]" class="form-select">
+                                    <option value="">Select Furnishing</option>
+                                    <option value="unfurnished" <%= listing.furnishing === 'unfurnished' ? 'selected' : '' %>>Unfurnished</option>
+                                    <option value="semi-furnished" <%= listing.furnishing === 'semi-furnished' ? 'selected' : '' %>>Semi-Furnished</option>
+                                    <option value="fully-furnished" <%= listing.furnishing === 'fully-furnished' ? 'selected' : '' %>>Fully Furnished</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="floor" class="form-label">Floor</label>
+                                <input name="listing[floor]" value="<%= listing.floor || '' %>" type="number" class="form-control" min="0">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="totalFloors" class="form-label">Total Floors</label>
+                                <input name="listing[totalFloors]" value="<%= listing.totalFloors || '' %>" type="number" class="form-control" min="0">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="yearBuilt" class="form-label">Year Built</label>
+                                <input name="listing[yearBuilt]" value="<%= listing.yearBuilt || '' %>" type="number" class="form-control" min="1900" max="<%= new Date().getFullYear() %>">
+                            </div>
+                        </div>
+
+                        <!-- Location Section -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">
+                                    <i class="fas fa-map-marker-alt me-2"></i>Location
+                                </h5>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="country" class="form-label">Country *</label>
+                                <input name="listing[address][country]" value="<%= listing.address && listing.address.country ? listing.address.country : 'India' %>" type="text" class="form-control" required>
+                                <div class="invalid-feedback">Please provide a country</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="state" class="form-label">State</label>
+                                <input name="listing[address][state]" value="<%= listing.address && listing.address.state ? listing.address.state : '' %>" type="text" class="form-control">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="city" class="form-label">City *</label>
+                                <input name="listing[address][city]" value="<%= listing.address && listing.address.city ? listing.address.city : '' %>" type="text" class="form-control" required>
+                                <div class="invalid-feedback">Please provide a city</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="street" class="form-label">Street Address</label>
+                                <input name="listing[address][street]" value="<%= listing.address && listing.address.street ? listing.address.street : '' %>" type="text" class="form-control">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="pincode" class="form-label">Pincode</label>
+                                <input name="listing[address][pincode]" value="<%= listing.address && listing.address.pincode ? listing.address.pincode : '' %>" type="text" class="form-control">
+                            </div>
+                        </div>
+
+                        <!-- Images Section -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">
+                                    <i class="fas fa-images me-2"></i>Images
+                                </h5>
+                            </div>
+                            
+                            <!-- Current Images -->
+                            <% if (listing.images && listing.images.length > 0) { %>
+                                <div class="col-12 mb-3">
+                                    <label class="form-label">Current Images</label>
+                                    <div class="row">
+                                        <% listing.images.forEach((image, index) => { %>
+                                            <div class="col-md-3 mb-2">
+                                                <div class="position-relative">
+                                                    <img src="<%= image.url %>" class="img-thumbnail" style="width: 100%; height: 150px; object-fit: cover;">
+                                                    <div class="position-absolute top-0 end-0 p-1">
+                                                        <button type="button" class="btn btn-sm btn-danger" onclick="removeImage(<%= index %>)">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <% }); %>
+                                    </div>
+                                </div>
+                            <% } %>
+
+                            <!-- Upload New Images -->
+                            <div class="col-12 mb-3">
+                                <label for="images" class="form-label">Upload New Images</label>
+                                <input name="listing[images]" type="file" class="form-control" multiple accept="image/*" id="imageInput">
+                                <div class="form-text">You can select multiple images. Supported formats: JPG, PNG, GIF</div>
+                            </div>
+
+                            <!-- Image Preview -->
+                            <div class="col-12 mb-3">
+                                <div id="imagePreview" class="row"></div>
+                            </div>
+                        </div>
+
+                        <!-- Additional Options -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">
+                                    <i class="fas fa-cog me-2"></i>Additional Options
+                                </h5>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check">
+                                                                    <input name="listing[featured]" class="form-check-input" type="checkbox" id="featured" <%= listing.featured ? 'checked' : '' %>>
+                                <label class="form-check-label" for="featured">
+                                    Mark as Featured Property
+                                </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check">
+                                    <input name="listing[isVerified]" class="form-check-input" type="checkbox" id="isVerified" <%= listing.isVerified ? 'checked' : '' %>>
+                                    <label class="form-check-label" for="isVerified">
+                                        Mark as Verified Property
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Buttons -->
+                        <div class="row">
+                            <div class="col-12 text-center">
+                                <button type="submit" class="btn btn-primary btn-lg me-3">
+                                    <i class="fas fa-save me-2"></i>Update Listing
+                                </button>
+                                <a href="/listings/<%= listing._id %>" class="btn btn-secondary btn-lg">
+                                    <i class="fas fa-times me-2"></i>Cancel
+                                </a>
+                            </div>
+                        </div>
+                    </form>
                 </div>
-                <div class="mb-3 col-md-8">
-                    <label for="country" class="form-label">Country</label>
-                    <input name="listing[country]" value="<%= listing.country %>" type="text" class="form-control" required>
-                    <div class="invalid-feedback">Country name should be valid</div>
-                </div>
             </div>
-            <div class="mb-3">
-                <label for="location" class="form-label">Location</label>
-                <input name="listing[location]" value="<%= listing.location %>" type="text" class="form-control" required>
-                <div class="invalid-feedback">Location should be valid</div>
-            </div>
-            <button class="btn btn-dark edit-btn mt-3">Edit</button>
-        </form>
+        </div>
     </div>
 </div>
+
+<script>
+// Form validation
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+
+// Image preview functionality
+document.getElementById('imageInput').addEventListener('change', function(e) {
+    const preview = document.getElementById('imagePreview');
+    preview.innerHTML = '';
+    
+    Array.from(e.target.files).forEach((file, index) => {
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const col = document.createElement('div');
+                col.className = 'col-md-3 mb-2';
+                col.innerHTML = `
+                    <img src="${e.target.result}" class="img-thumbnail" style="width: 100%; height: 150px; object-fit: cover;">
+                `;
+                preview.appendChild(col);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+});
+
+// Remove image function (for future implementation)
+function removeImage(index) {
+    if (confirm('Are you sure you want to remove this image?')) {
+        // Implementation for removing images would go here
+        console.log('Remove image at index:', index);
+    }
+}
+</script>

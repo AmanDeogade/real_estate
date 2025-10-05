@@ -1,80 +1,686 @@
 <% layout("/layouts/boilerplate") %>
-<body>
-    '<div class="row mt-3">
-        <div class="col-8 offset-3">
-            <h3><%= listing.title %></h3>
-        </div>
 
-            <div class="card col-6 offset-3 show-card listing-card">
-                <img src="<%= listing.image.url %>" class="card-img-top show-img" alt="listing_image">
-                <div class="card-body">
-                    <p class="card-text">Owned by <i><%= listing.owner.username %></i></p>
-                    <p class="card-text"><%= listing.description %></p>
-                    <p class="card-text">&#8377; <%= listing.price.toLocaleString("en-IN") %></p>
-                    <p class="card-text"><%= listing.location %></p>
-                    <p class="card-text"><%= listing.country %></p>
-                </div>
-            </div>
-    </div>
-    
-    <% if(currUser && listing.owner._id.equals(currUser._id)) { %>
-        <div class="btns">
-            <a href="/listings/<%= listing._id %>/edit" class="btn btn-dark col-1 offset-3 edit-btn">Edit</a>
-            <form action="/listings/<%= listing._id %>?_method=DELETE" method="POST"><button class="btn btn-dark offset-4">Delete</button></form>
-        </div>
+<div class="container mt-4">
+    <% if (currUser) { %>
+        <span id="__loggedInMarker" style="display:none"></span>
     <% } %>
-    
-    
-    <div class="col-8 offset-3 mb-3">
-        <hr>
-        <% if(currUser) { %>
-        <h4>Leave a Review</h4>
-        <form action="/listings/<%= listing.id %>/reviews" method="POST" novalidate class="needs-validation">
-            <div class="mb-3 mt-3">
-                <label for="rating" class="form-label">Rating</label>
-                <fieldset class="starability-heart">
-                    <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="1" checked aria-label="No rating." />
-                    <input type="radio" id="first-rate1" name="review[rating]" value="1" />
-                    <label for="first-rate1" title="Terrible">1 star</label>
-                    <input type="radio" id="first-rate2" name="review[rating]" value="2" />
-                    <label for="first-rate2" title="Not good">2 stars</label>
-                    <input type="radio" id="first-rate3" name="review[rating]" value="3" />
-                    <label for="first-rate3" title="Average">3 stars</label>
-                    <input type="radio" id="first-rate4" name="review[rating]" value="4" />
-                    <label for="first-rate4" title="Very good">4 stars</label>
-                    <input type="radio" id="first-rate5" name="review[rating]" value="5" />
-                    <label for="first-rate5" title="Amazing">5 stars</label>
-                </fieldset>
-            </div>
-            <div class="mb-3 mt-3">
-                <label for="comment" class="form-label">Comments</label>
-                <textarea name="review[comment]" id="comment" cols="30" rows="5" class="form-control" required></textarea>
-                <div class="invalid-feedback">
-                    Please add some comments for review
-                </div>
-            </div>
-            <button class="btn btn-outline-dark">Submit</button>
-        </form>
-        <hr>
-        <% } %>
+    <!-- Property Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/listings">Properties</a></li>
+                    <li class="breadcrumb-item active" aria-current="page"><%= listing.title %></li>
+                </ol>
+            </nav>
+        </div>
+    </div>
 
-        <p><b>All Reviews</b></p>
-        
-        <div class="row">
-            <% for(review of listing.reviews) { %>
-                <div class="card col-5 ms-3 mb-3">
-                    <div class="card-body">
-                        <h5 class="card-title">@<%= review.author.username %></h5>
-                        <p class="starability-result card-text" data-rating="<%= review.rating %>"></p>
-                        <p class="card-text"><%= review.comment %></p>
-                    </div>
-                    <% if(currUser && review.author.equals(currUser._id)) { %>
-                        <form action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE" class="mb-3" method="POST">
-                            <button class="btn btn-sm btn-dark">Delete</button>
-                        </form>
+    <!-- Property Title and Status -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <h1 class="display-5 fw-bold text-primary mb-2"><%= listing.title %></h1>
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <span class="badge bg-<%= listing.status === 'active' ? 'success' : listing.status === 'pending' ? 'warning' : listing.status === 'sold' ? 'danger' : listing.status === 'rented' ? 'info' : 'secondary' %> fs-6">
+                    <%= listing.status.charAt(0).toUpperCase() + listing.status.slice(1) %>
+                </span>
+                <% if (listing.isFeatured) { %>
+                    <span class="badge bg-warning text-dark fs-6">
+                        <i class="fas fa-star me-1"></i>Featured
+                    </span>
+                <% } %>
+                <% if (listing.isVerified) { %>
+                    <span class="badge bg-info text-white fs-6">
+                        <i class="fas fa-check-circle me-1"></i>Verified
+                    </span>
+                <% } %>
+            </div>
+            <p class="text-muted mb-0">
+                <i class="fas fa-map-marker-alt me-2"></i>
+                <%= listing.address?.street || '' %>, <%= listing.address?.city || '' %>, <%= listing.address?.state || '' %>, <%= listing.address?.country || 'India' %>
+            </p>
+        </div>
+        <div class="col-lg-4 text-lg-end">
+            <div class="price-display">
+                <h2 class="text-success fw-bold">
+                    ₹<%= listing.price.amount.toLocaleString("en-IN") %>
+                    <% if (listing.listingType === 'rent') { %>
+                        <small class="text-muted fs-6">/month</small>
                     <% } %>
+                </h2>
+                <p class="text-muted mb-0">
+                    <% if (listing.price.type === 'negotiable') { %>
+                        <i class="fas fa-handshake me-1"></i>Negotiable
+                    <% } else if (listing.price.type === 'on-request') { %>
+                        <i class="fas fa-question-circle me-1"></i>Price on Request
+                    <% } else { %>
+                        <i class="fas fa-tag me-1"></i>Fixed Price
+                    <% } %>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Property Images -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <% if (listing.images && listing.images.length > 0) { %>
+                <div class="main-image-container">
+                    <img src="<%= listing.images[0].url %>" class="img-fluid rounded shadow" style="width: 100%; height: 400px; object-fit: cover;" alt="<%= listing.title %>">
+                </div>
+                <% if (listing.images.length > 1) { %>
+                    <div class="row mt-3">
+                        <% listing.images.slice(1, 5).forEach((image, index) => { %>
+                            <div class="col-md-3 mb-2">
+                                <img src="<%= image.url %>" class="img-thumbnail" style="width: 100%; height: 100px; object-fit: cover; cursor: pointer;" 
+                                     onclick="changeMainImage('<%= image.url %>')" alt="Property image <%= index + 2 %>">
+                            </div>
+                        <% }); %>
+                    </div>
+                <% } %>
+            <% } else { %>
+                <div class="text-center py-5 bg-light rounded">
+                    <i class="fas fa-image fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">No images available</p>
                 </div>
             <% } %>
         </div>
     </div>
-</body>
+
+    <!-- Property Details Grid -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <!-- Property Information -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Property Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <strong>Property Type:</strong>
+                            <span class="badge bg-primary ms-2"><%= listing.propertyType.charAt(0).toUpperCase() + listing.propertyType.slice(1) %></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong>Listing Type:</strong>
+                            <span class="badge bg-<%= listing.listingType === 'sale' ? 'success' : 'info' %> ms-2">
+                                For <%= listing.listingType.charAt(0).toUpperCase() + listing.listingType.slice(1) %>
+                            </span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong>Bedrooms:</strong>
+                            <span class="ms-2"><%= listing.bedrooms || 'N/A' %></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong>Bathrooms:</strong>
+                            <span class="ms-2"><%= listing.bathrooms || 'N/A' %></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong>Area:</strong>
+                            <span class="ms-2"><%= listing.area?.size ? `${listing.area.size} ${listing.area.unit}` : 'N/A' %></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong>Furnishing:</strong>
+                            <span class="ms-2"><%= listing.furnishing ? listing.furnishing.charAt(0).toUpperCase() + listing.furnishing.slice(1) : 'N/A' %></span>
+                        </div>
+                    </div>
+                    
+                    <% if (listing.yearBuilt) { %>
+                        <div class="col-md-6 mb-3">
+                            <strong>Year Built:</strong>
+                            <span class="ms-2"><%= listing.yearBuilt %></span>
+                        </div>
+                    <% } %>
+                    <% if (listing.floor) { %>
+                        <div class="col-md-6 mb-3">
+                            <strong>Floor:</strong>
+                            <span class="ms-2"><%= listing.floor %> of <%= listing.totalFloors || 'N/A' %></span>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-align-left me-2"></i>Description
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0"><%= listing.description %></p>
+                </div>
+            </div>
+
+            <!-- Location Details -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-map-marker-alt me-2"></i>Location Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <strong>Street:</strong>
+                            <p class="mb-1"><%= listing.address?.street || 'Not specified' %></p>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <strong>City:</strong>
+                            <p class="mb-1"><%= listing.address?.city || 'Not specified' %></p>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <strong>State:</strong>
+                            <p class="mb-1"><%= listing.address?.state || 'Not specified' %></p>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <strong>Pincode:</strong>
+                            <p class="mb-1"><%= listing.address?.pincode || 'Not specified' %></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Owner Information -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">
+                        <i class="fas fa-user me-2"></i>Property Owner
+                    </h6>
+                </div>
+                <div class="card-body text-center">
+                    <div class="avatar-placeholder mb-3">
+                        <i class="fas fa-user-circle fa-3x text-primary"></i>
+                    </div>
+                    <h6 class="mb-1"><%= listing.owner.displayName || listing.owner.username %></h6>
+                    <p class="text-muted small mb-2">Member since <%= new Date(listing.owner.createdAt).getFullYear() %></p>
+                    <% if (currUser && !currUser._id.equals(listing.owner._id)) { %>
+                        <button class="btn btn-outline-primary btn-sm" onclick="contactOwner()">
+                            <i class="fas fa-envelope me-1"></i>Contact Owner
+                        </button>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">
+                        <i class="fas fa-bolt me-2"></i>Quick Actions
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <% if (currUser) { %>
+                            <% if (currUser._id.equals(listing.owner._id)) { %>
+                                <a href="/listings/<%= listing._id %>/edit" class="btn btn-primary">
+                                    <i class="fas fa-edit me-2"></i>Edit Listing
+                                </a>
+                                <form action="/listings/<%= listing._id %>?_method=DELETE" method="POST" class="d-inline">
+                                    <button type="submit" class="btn btn-danger w-100" onclick="return confirm('Are you sure you want to delete this listing?')">
+                                        <i class="fas fa-trash me-2"></i>Delete Listing
+                                    </button>
+                                </form>
+                            <% } else { %>
+                                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#inquiryModal">
+                                    <i class="fas fa-phone me-2"></i>Request Visit
+                                </button>
+                                <button class="btn btn-outline-warning" onclick="toggleFavorite()" id="favoriteBtn">
+                                    <i class="fas fa-heart me-2"></i>
+                                    <span id="favoriteText">Add to Favorites</span>
+                                </button>
+                            <% } %>
+                        <% } else { %>
+                            <a href="/login" class="btn btn-primary">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login to Interact
+                            </a>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Property Stats -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">
+                        <i class="fas fa-chart-line me-2"></i>Property Stats
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6 mb-3">
+                            <div class="stat-item">
+                                <h4 class="text-primary mb-1"><%= listing.views || 0 %></h4>
+                                <small class="text-muted">Views</small>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="stat-item">
+                                <h4 class="text-success mb-1"><%= listing.inquiries ? listing.inquiries.length : 0 %></h4>
+                                <small class="text-muted">Inquiries</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-item">
+                                <h4 class="text-info mb-1"><%= listing.reviews ? listing.reviews.length : 0 %></h4>
+                                <small class="text-muted">Reviews</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-item">
+                                <h4 class="text-warning mb-1"><%= listing.favorites ? listing.favorites.length : 0 %></h4>
+                                <small class="text-muted">Favorites</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Location Scores -->
+            <% if (listing.locationScores && listing.locationScores.overallScore !== null) { %>
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>Location Scores
+                        <small class="text-muted">(Calculated on <%= new Date(listing.locationScores.scoresCalculatedAt).toLocaleDateString() %>)</small>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <div class="text-center p-3 border rounded">
+                                <h6 class="text-success mb-2">🏥 Amenities</h6>
+                                <h4 class="text-success mb-1"><%= listing.locationScores.amenityScore %>/100</h4>
+                                <small class="text-muted">Nearby facilities</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="text-center p-3 border rounded">
+                                <h6 class="text-info mb-2">🌳 Environment</h6>
+                                <h4 class="text-info mb-1"><%= listing.locationScores.environmentScore %>/100</h4>
+                                <small class="text-muted">Green spaces & air quality</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="text-center p-3 border rounded">
+                                <h6 class="text-warning mb-2">🛡️ Safety</h6>
+                                <h4 class="text-warning mb-1"><%= listing.locationScores.safetyScore %>/100</h4>
+                                <small class="text-muted">Security & police presence</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="text-center p-3 border rounded bg-primary text-white">
+                                <h6 class="mb-2">🏆 Overall</h6>
+                                <h4 class="mb-1"><%= listing.locationScores.overallScore %>/100</h6>
+                                <small class="opacity-75">Combined location score</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Detailed Score Information -->
+                    <div class="mt-4">
+                        <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#scoreDetails" aria-expanded="false">
+                            <i class="fas fa-info-circle me-2"></i>View Detailed Scores
+                        </button>
+                        <div class="collapse mt-3" id="scoreDetails">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="text-success">Amenity Details:</h6>
+                                    <ul class="list-unstyled small">
+                                        <% if (listing.locationScores.scoreDetails && listing.locationScores.scoreDetails.amenityDetails) { %>
+                                            <% const amenities = listing.locationScores.scoreDetails.amenityDetails; %>
+                                            <li><strong>Hospital:</strong> <%= amenities.hospital?.found ? (amenities.hospital.distance/1000).toFixed(2) + ' km' : 'Not found' %></li>
+                                            <li><strong>School:</strong> <%= amenities.school?.found ? (amenities.school.distance/1000).toFixed(2) + ' km' : 'Not found' %></li>
+                                            <li><strong>College:</strong> <%= amenities.college?.found ? (amenities.college.distance/1000).toFixed(2) + ' km' : 'Not found' %></li>
+                                            <li><strong>Mall:</strong> <%= amenities.mall?.found ? (amenities.mall.distance/1000).toFixed(2) + ' km' : 'Not found' %></li>
+                                            <li><strong>Pharmacy:</strong> <%= amenities.pharmacy?.found ? (amenities.pharmacy.distance/1000).toFixed(2) + ' km' : 'Not found' %></li>
+                                            <li><strong>Police:</strong> <%= amenities.police?.found ? (amenities.police.distance/1000).toFixed(2) + ' km' : 'Not found' %></li>
+                                            <li><strong>Bus Stop:</strong> <%= amenities.busstop?.found ? (amenities.busstop.distance/1000).toFixed(2) + ' km' : 'Not found' %></li>
+                                        <% } %>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <% if (listing.locationScores.scoreDetails && listing.locationScores.scoreDetails.environmentDetails) { %>
+                                        <% const env = listing.locationScores.scoreDetails.environmentDetails; %>
+                                        <h6 class="text-info">Environment Details:</h6>
+                                        <ul class="list-unstyled small">
+                                            <li><strong>Green Features:</strong> <%= env.greenFeatures || 0 %></li>
+                                            <li><strong>Industrial Features:</strong> <%= env.industrialFeatures || 0 %></li>
+                                            <li><strong>Nearest Major Road:</strong> <%= env.nearestMajorRoad === Infinity ? 'None in radius' : (env.nearestMajorRoad/1000).toFixed(2) + ' km' %></li>
+                                        </ul>
+                                    <% } %>
+                                    
+                                    <% if (listing.locationScores.scoreDetails && listing.locationScores.scoreDetails.safetyDetails) { %>
+                                        <% const safety = listing.locationScores.scoreDetails.safetyDetails; %>
+                                        <h6 class="text-warning">Safety Details:</h6>
+                                        <ul class="list-unstyled small">
+                                            <li><strong>Police Stations:</strong> <%= safety.policeStations || 0 %></li>
+                                            <li><strong>Nearest Police:</strong> <%= safety.nearestPoliceDistance === Infinity ? 'None in radius' : (safety.nearestPoliceDistance/1000).toFixed(2) + ' km' %></li>
+                                            <li><strong>CCTV Cameras:</strong> <%= safety.cctvCameras || 0 %></li>
+                                            <li><strong>Nightlife Spots:</strong> <%= safety.nightlifeSpots || 0 %></li>
+                                        </ul>
+                                    <% } %>
+                                    
+                                    <% if (listing.locationScores.scoreDetails && listing.locationScores.scoreDetails.pollutionDetails) { %>
+                                        <% const pollution = listing.locationScores.scoreDetails.pollutionDetails; %>
+                                        <h6 class="text-secondary">Pollution Details:</h6>
+                                        <ul class="list-unstyled small">
+                                            <% if (pollution.pm25Value) { %>
+                                                <li><strong>PM2.5:</strong> <%= pollution.pm25Value %> µg/m³</li>
+                                            <% } %>
+                                            <li><strong>Data Source:</strong> <%= pollution.dataSource || 'estimated' %></li>
+                                        </ul>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <% } %>
+
+            <!-- Reviews Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-star me-2"></i>Reviews (<%= listing.reviews ? listing.reviews.length : 0 %>)
+                    </h5>
+                    <% if (currUser) { %>
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#reviewModal">
+                            <i class="fas fa-plus me-1"></i>Write Review
+                        </button>
+                    <% } %>
+                </div>
+                <div class="card-body">
+                    <% if (listing.reviews && listing.reviews.length > 0) { %>
+                        <div class="row">
+                            <% listing.reviews.forEach(review => { %>
+                                <div class="col-md-6 mb-3">
+                                    <div class="review-card border rounded p-3">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div>
+                                                <h6 class="mb-1">@<%= review.author.username %></h6>
+                                                <div class="starability-result" data-rating="<%= review.rating %>"></div>
+                                            </div>
+                                            <small class="text-muted">
+                                                <%= new Date(review.createdAt).toLocaleDateString() %>
+                                            </small>
+                                        </div>
+                                        <p class="mb-2"><%= review.comment %></p>
+                                        <% if (currUser && review.author._id.equals(currUser._id)) { %>
+                                            <form action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE" method="POST" class="d-inline">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this review?')">
+                                                    <i class="fas fa-trash me-1"></i>Delete
+                                                </button>
+                                            </form>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            <% }); %>
+                        </div>
+                    <% } else { %>
+                        <div class="text-center py-4">
+                            <i class="fas fa-star fa-2x text-muted mb-3"></i>
+                            <p class="text-muted">No reviews yet. Be the first to review this property!</p>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Review Modal -->
+<% if (currUser) { %>
+    <div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reviewModalLabel">Write a Review</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="/listings/<%= listing._id %>/reviews" method="POST" novalidate class="needs-validation">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="rating" class="form-label">Rating</label>
+                            <fieldset class="starability-heart">
+                                <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="1" checked aria-label="No rating." />
+                                <input type="radio" id="first-rate1" name="review[rating]" value="1" />
+                                <label for="first-rate1" title="Terrible">1 star</label>
+                                <input type="radio" id="first-rate2" name="review[rating]" value="2" />
+                                <label for="first-rate2" title="Not good">2 stars</label>
+                                <input type="radio" id="first-rate3" name="review[rating]" value="3" />
+                                <label for="first-rate3" title="Average">3 stars</label>
+                                <input type="radio" id="first-rate4" name="review[rating]" value="4" />
+                                <label for="first-rate4" title="Very good">4 stars</label>
+                                <input type="radio" id="first-rate5" name="review[rating]" value="5" />
+                                <label for="first-rate5" title="Amazing">5 stars</label>
+                            </fieldset>
+                        </div>
+                        <div class="mb-3">
+                            <label for="comment" class="form-label">Comments</label>
+                            <textarea name="review[comment]" id="comment" class="form-control" rows="4" required></textarea>
+                            <div class="invalid-feedback">Please add some comments for your review</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Submit Review</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+<% } %>
+
+<!-- Property Inquiry Modal -->
+<% if (currUser) { %>
+    <div class="modal fade" id="inquiryModal" tabindex="-1" aria-labelledby="inquiryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="inquiryModalLabel">
+                        <i class="fas fa-phone me-2"></i>Request Property Visit
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="/listings/<%= listing._id %>/inquire" method="POST" novalidate class="needs-validation">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="contactPreference" class="form-label">Preferred Contact Method</label>
+                                <select class="form-control" id="contactPreference" name="contactPreference" required>
+                                    <option value="">Select contact method</option>
+                                    <option value="phone">Phone Call</option>
+                                    <option value="email">Email</option>
+                                    <option value="whatsapp">WhatsApp</option>
+                                </select>
+                                <div class="invalid-feedback">Please select your preferred contact method</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="interest" class="form-label">Interest Type</label>
+                                <select class="form-control" id="interest" name="interest" required>
+                                    <option value="">Select interest</option>
+                                    <option value="buy">Buy</option>
+                                    <option value="rent">Rent</option>
+                                    <option value="visit">Just Visit</option>
+                                    <option value="more_info">More Information</option>
+                                </select>
+                                <div class="invalid-feedback">Please select your interest type</div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Message to Property Owner</label>
+                            <textarea class="form-control" id="message" name="message" rows="4" 
+                                placeholder="Tell the owner about your interest, preferred visit time, or any specific questions you have..." required></textarea>
+                            <div class="invalid-feedback">Please provide a message</div>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Your Contact Information:</strong><br>
+                            <small>
+                                Name: <%= currUser.firstName %> <%= currUser.lastName %><br>
+                                Email: <%= currUser.email %><br>
+                                Phone: <%= currUser.phone %>
+                            </small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-paper-plane me-2"></i>Send Inquiry
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+<% } %>
+
+<script>
+// Form validation
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+
+// Change main image
+function changeMainImage(imageUrl) {
+    document.querySelector('.main-image-container img').src = imageUrl;
+}
+
+// Toggle favorite function
+function toggleFavorite() {
+    const propertyId = '<%= listing._id %>';
+    const btn = document.getElementById('favoriteBtn');
+    const text = document.getElementById('favoriteText');
+    
+    fetch('/favorites/toggle', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ propertyId: propertyId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.action === 'added') {
+            btn.classList.remove('btn-outline-warning');
+            btn.classList.add('btn-warning');
+            text.textContent = 'Remove from Favorites';
+            showToast('Property added to favorites!', 'success');
+        } else {
+            btn.classList.remove('btn-warning');
+            btn.classList.add('btn-outline-warning');
+            text.textContent = 'Add to Favorites';
+            showToast('Property removed from favorites!', 'info');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Error updating favorites!', 'error');
+    });
+}
+
+// Show toast notification
+function showToast(message, type) {
+    const toastContainer = document.getElementById('toastContainer');
+    if (!toastContainer) {
+        // Create toast container if it doesn't exist
+        const container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container position-fixed top-0 end-0 p-3';
+        container.style.zIndex = '9999';
+        document.body.appendChild(container);
+    }
+    
+    const toastId = 'toast-' + Date.now();
+    const toastHtml = `
+        <div id="${toastId}" class="toast" role="alert">
+            <div class="toast-header bg-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info'} text-white">
+                <strong class="me-auto">Notification</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body">
+                ${message}
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('toastContainer').innerHTML += toastHtml;
+    const toastElement = document.getElementById(toastId);
+    const toast = new bootstrap.Toast(toastElement);
+    toast.show();
+    
+    // Remove toast element after it's hidden
+    toastElement.addEventListener('hidden.bs.toast', () => {
+        toastElement.remove();
+    });
+}
+
+// Check if property is already in favorites on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const propertyId = '<%= listing._id %>';
+    if (propertyId) {
+        fetch(`/favorites/check/${propertyId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.isFavorite) {
+                    const btn = document.getElementById('favoriteBtn');
+                    const text = document.getElementById('favoriteText');
+                    btn.classList.remove('btn-outline-warning');
+                    btn.classList.add('btn-warning');
+                    text.textContent = 'Remove from Favorites';
+                }
+            })
+            .catch(error => console.error('Error checking favorite status:', error));
+    }
+});
+</script>
+
+<script>
+(function(){
+    // Determine login state via the presence of a server-rendered marker element
+    function contactOwner() {
+        const isLoggedIn = document.getElementById('__loggedInMarker') !== null;
+        if (!isLoggedIn) {
+            window.location.href = '/login';
+            return;
+        }
+        // Show the inquiry modal when logged in
+        var modalEl = document.getElementById('inquiryModal');
+        if (modalEl) {
+            var inquiryModal = new bootstrap.Modal(modalEl);
+            inquiryModal.show();
+        } else {
+            // Fallback: navigate to listings page's search section
+            window.location.href = '/listings#searchSection';
+        }
+    }
+
+    // Expose globally for inline onclick handlers
+    window.contactOwner = contactOwner;
+})();
+</script>

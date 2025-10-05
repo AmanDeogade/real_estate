@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Listing Creation</title>
+</head>
+<body>
+    <h1>Test Listing Creation</h1>
+    
+    <form action="/listings" method="POST" enctype="multipart/form-data">
+        <div>
+            <label for="title">Title (Required):</label>
+            <input type="text" name="listing[title]" id="title" required>
+        </div>
+        
+        <div>
+            <label for="description">Description (Required):</label>
+            <textarea name="listing[description]" id="description" required></textarea>
+        </div>
+        
+        <div>
+            <label for="propertyType">Property Type (Required):</label>
+            <select name="listing[propertyType]" id="propertyType" required>
+                <option value="">Select Type</option>
+                <option value="apartment">Apartment</option>
+                <option value="house">House</option>
+                <option value="villa">Villa</option>
+                <option value="commercial">Commercial</option>
+                <option value="land">Land</option>
+                <option value="office">Office</option>
+                <option value="shop">Shop</option>
+            </select>
+        </div>
+        
+        <div>
+            <label for="listingType">Listing Type (Required):</label>
+            <select name="listing[listingType]" id="listingType" required>
+                <option value="">Select Type</option>
+                <option value="sale">Sale</option>
+                <option value="rent">Rent</option>
+            </select>
+        </div>
+        
+        <div>
+            <label for="priceAmount">Price Amount (Required):</label>
+            <input type="number" name="listing[price][amount]" id="priceAmount" required>
+        </div>
+        
+        <div>
+            <label for="city">City (Required):</label>
+            <input type="text" name="listing[address][city]" id="city" required>
+        </div>
+        
+        <div>
+            <label for="state">State (Required):</label>
+            <input type="text" name="listing[address][state]" id="state" required>
+        </div>
+        
+        <div>
+            <label for="images">Images (Required):</label>
+            <input type="file" name="listing[images]" id="images" multiple accept="image/*" required>
+        </div>
+        
+        <button type="submit">Create Test Listing</button>
+    </form>
+    
+    <script>
+        document.querySelector('form').addEventListener('submit', function(e) {
+            console.log('Form submitted');
+            const formData = new FormData(this);
+            for (let [key, value] of formData.entries()) {
+                console.log(key + ': ' + value);
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+
+

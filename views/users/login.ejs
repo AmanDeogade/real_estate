@@ -1,17 +1,289 @@
 <% layout("/layouts/boilerplate") %>
-<div class="row mt-3">
-    <h1 class="col-6 offset-3">Login</h1>
-    <div class="col-6 offset-3">
-        <form action="/login" method="POST" class="needs-validation" novalidate>
-            <div class="mb-3">
-                <label for="username" id="username" class="form-label">Username</label>
-                <input name="username"type="text" class="form-control" required>
+
+<div class="container-fluid py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Role Selection Section -->
+            <div id="roleSelection" class="text-center mb-5">
+                <h1 class="display-4 text-primary mb-3">Welcome to Karnavat&Associates</h1>
+                
+                <!-- Role Selection Cards -->
+                <div class="row g-4 mb-5">
+                    <!-- Buyer/Renter Card -->
+                    <div class="col-lg-4">
+                        <div class="card h-100 shadow-sm border-0" id="buyerCard">
+                            <div class="card-body text-center p-4">
+                                <div class="mb-3">
+                                    <i class="fas fa-home fa-3x text-primary"></i>
+                                </div>
+                                <h4 class="card-title text-primary">Property Discovery</h4>
+                                <p class="card-text text-muted">Find properties and manage your favorites</p>
+                                
+                                <div class="text-start mb-3">
+                                    <h6 class="fw-bold">Features:</h6>
+                                    <ul class="list-unstyled">
+                                        <!--<li><i class="fas fa-check text-success me-2"></i>Advanced property search</li>-->
+                                        <li><i class="fas fa-check text-success me-2"></i>Save favorite properties</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Request visits & contact owners</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Personalized recommendations</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Property alerts & notifications</li>
+                                    </ul>
+                                </div>
+                                
+                                <button class="btn btn-outline-primary w-100" onclick="showLoginForm('buyer')">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Login as Buyer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Property Owner Card -->
+                    <div class="col-lg-4">
+                        <div class="card h-100 shadow-sm border-0" id="ownerCard">
+                            <div class="card-body text-center p-4">
+                                <div class="mb-3">
+                                    <i class="fas fa-building fa-3x text-success"></i>
+                                </div>
+                                <h4 class="card-title text-success">Listing Management</h4>
+                                <p class="card-text text-muted">Manage your property listings, track performance, and connect with potential buyers</p>
+                                
+                                <div class="text-start mb-3">
+                                    <h6 class="fw-bold">Features:</h6>
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-check text-success me-2"></i>Add/edit/delete listings</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Media uploads & management</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Track views & inquiries</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Set property status</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Assign brokers to listings</li>
+                                    </ul>
+                                </div>
+                                
+                                <button class="btn btn-outline-success w-100" onclick="showLoginForm('property_owner')">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Login as Owner
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Broker Card -->
+                    <div class="col-lg-4">
+                        <div class="card h-100 shadow-sm border-0" id="brokerCard">
+                            <div class="card-body text-center p-4">
+                                <div class="mb-3">
+                                    <i class="fas fa-user-tie fa-3x text-info"></i>
+                                </div>
+                                <h4 class="card-title text-info">Lead Management & CRM</h4>
+                                <p class="card-text text-muted">Manage leads, track client interactions, and close more deals with our CRM tools</p>
+                                
+                                <div class="text-start mb-3">
+                                    <h6 class="fw-bold">Features:</h6>
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-check text-success me-2"></i>Auto-capture leads</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Lead stage management</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Add tasks & notes</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Follow-up scheduling</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Internal messaging system</li>
+                                    </ul>
+                                </div>
+                                
+                                <button class="btn btn-outline-info w-100" onclick="showLoginForm('broker')">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Login as Broker
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="mb-3">
-                <label for="password" id="password" class="form-label">Password</label>
-                <input name="password"type="password" class="form-control" required>
+
+            <!-- Login Forms (Hidden by default) -->
+            <div id="loginForms" style="display: none;">
+                <div class="row justify-content-center">
+                    <div class="col-md-6">
+                        <div class="card shadow border-0">
+                            <div class="card-header bg-primary text-white text-center">
+                                <h4 id="loginTitle" class="mb-0">Login</h4>
+                            </div>
+                            <div class="card-body p-4">
+                                <form id="loginForm" action="/login" method="POST" class="needs-validation" novalidate>
+                                    <input type="hidden" id="userTypeField" name="userType" value="">
+                                    
+                                    <div class="mb-3">
+                                        <label for="username" class="form-label">Username</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                            <input name="username" type="text" class="form-control" required>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="password" class="form-label">Password</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                            <input name="password" type="password" class="form-control" required>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-grid gap-2">
+                                        <button type="submit" class="btn btn-primary btn-lg">
+                                            <i class="fas fa-sign-in-alt me-2"></i>Login
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary" onclick="hideLoginForm()">
+                                            <i class="fas fa-arrow-left me-2"></i>Back to Selection
+                                        </button>
+                                    </div>
+                                </form>
+                                
+                                <hr class="my-4">
+                                <div class="text-center">
+                                    <p class="mb-2">Don't have an account?</p>
+                                    <a href="/signup" class="btn btn-outline-primary">
+                                        <i class="fas fa-user-plus me-2"></i>Sign Up
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <button class="btn btn-success">login</button>
-        </form>
+        </div>
     </div>
 </div>
+
+<style>
+.card {
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+}
+
+.card.active {
+    border: 2px solid var(--bs-primary) !important;
+    transform: translateY(-5px);
+}
+
+#buyerCard.active {
+    border-color: var(--bs-primary) !important;
+}
+
+#ownerCard.active {
+    border-color: var(--bs-success) !important;
+}
+
+#brokerCard.active {
+    border-color: var(--bs-info) !important;
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
+.btn-outline-success:hover {
+    background-color: var(--bs-success);
+    border-color: var(--bs-success);
+}
+
+.btn-outline-info:hover {
+    background-color: var(--bs-info);
+    border-color: var(--bs-info);
+}
+
+/* Smooth transitions */
+#roleSelection, #loginForms {
+    transition: opacity 0.3s ease-in-out;
+}
+
+.fade-out {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.fade-in {
+    opacity: 1;
+    pointer-events: auto;
+}
+</style>
+
+<script>
+function showLoginForm(userType) {
+    // Smooth fade out of role selection
+    const roleSelection = document.getElementById('roleSelection');
+    roleSelection.classList.add('fade-out');
+    
+    setTimeout(() => {
+        // Hide role selection
+        roleSelection.style.display = 'none';
+        
+        // Show login forms with fade in
+        const loginForms = document.getElementById('loginForms');
+        loginForms.style.display = 'block';
+        loginForms.classList.add('fade-in');
+        
+        // Set user type and update title
+        document.getElementById('userTypeField').value = userType;
+        
+        let title = '';
+        let color = '';
+        
+        switch(userType) {
+            case 'buyer':
+                title = 'Property Discovery Login';
+                color = 'primary';
+                break;
+            case 'property_owner':
+                title = 'Listing Management Login';
+                color = 'success';
+                break;
+            case 'broker':
+                title = 'Lead Management Login';
+                color = 'info';
+                break;
+        }
+        
+        document.getElementById('loginTitle').textContent = title;
+        document.getElementById('loginTitle').className = `mb-0 text-${color}`;
+        document.querySelector('.card-header').className = `card-header bg-${color} text-white text-center`;
+        
+        // Focus on username field
+        document.querySelector('input[name="username"]').focus();
+    }, 300);
+}
+
+function hideLoginForm() {
+    // Smooth fade out of login forms
+    const loginForms = document.getElementById('loginForms');
+    loginForms.classList.add('fade-out');
+    
+    setTimeout(() => {
+        // Hide login forms
+        loginForms.style.display = 'none';
+        
+        // Show role selection with fade in
+        const roleSelection = document.getElementById('roleSelection');
+        roleSelection.style.display = 'block';
+        roleSelection.classList.remove('fade-out');
+        roleSelection.classList.add('fade-in');
+        
+        // Reset form
+        document.getElementById('loginForm').reset();
+    }, 300);
+}
+
+// Add click effects to cards
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.card');
+    
+    cards.forEach(card => {
+        card.addEventListener('click', function() {
+            // Remove active class from all cards
+            cards.forEach(c => c.classList.remove('active'));
+            // Add active class to clicked card
+            this.classList.add('active');
+        });
+    });
+});
+</script>
